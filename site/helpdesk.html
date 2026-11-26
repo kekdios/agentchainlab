@@ -142,6 +142,7 @@ async function ask(){
     th.style.display = 'none';
     box.className = 'answer show';
     if(d.a){ body.textContent = d.a; note.textContent = 'answered by the helpdesk seat — verified ops context'; }
+    else if(d.closed){ body.textContent = d.msg || 'the desk is closed — funding for today ran out. Back tomorrow.'; note.textContent = 'the desk runs on a fixed daily budget'; }
     else if(d.refused){ body.textContent = 'That one\'s outside the desk — FLOP questions only. Try a miner/testnet question.'; note.textContent=''; }
     else { body.textContent = d.error || 'desk hiccuped — try again'; note.textContent=''; }
     hint.textContent = 'FLOP questions only — off-topic gets a polite refusal.';
