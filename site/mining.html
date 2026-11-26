@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>AgentChainLab — devnet mining</title>
-<meta name="description" content="FLOP devnet miner status: sponsorship, calibration, session capacity, worker activity." />
+<title>AgentChainLab — miner status</title>
+<meta name="description" content="FLOP miner status: sponsorship, calibration, session capacity, worker activity — devnet-proven, testnet-bound." />
 <link rel="icon" type="image/png" href="/assets/icon_flask.png" />
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
 <style>
@@ -83,7 +83,7 @@ td.k { color: var(--text-muted); white-space: nowrap; width: 180px; }
   <a href="/" class="brandLink">
     <img src="/assets/agentchainlab_nb.png" alt="AgentChainLab" class="brandLogo" />
     <span class="brandName">AgentChainLab</span>
-    <span class="brandSub">/ devnet mining</span>
+    <span class="brandSub">/ miner status</span>
   </a>
   <a href="/" class="backBtn">← Back</a>
 </header>
@@ -114,9 +114,12 @@ td.k { color: var(--text-muted); white-space: nowrap; width: 180px; }
   <p class="note">
     This miner serves <b>session-serving mode (Mode A, chain-settle)</b> on
     the FLOP devnet: buyers open sessions, the worker answers with the
-    registered model, and settlement happens on-chain. Devnet FLOP is test
-    value — the official docs state devnet earns no rewards and no airdrop
-    weight; it exists to prove the setup before testnet. Stake shown is
+    registered model, and settlement happens on-chain. Devnet proved the
+    setup end-to-end — <b>testnet is now live and this machine is
+    registration-ready</b>, waiting on a funding lane (sponsor slot or the
+    10k self-stake on the <a href="/fund.html">fund page</a>). Devnet FLOP
+    is test value — the official docs state devnet earns no rewards and no
+    airdrop weight. Stake shown is
     <b>network-sponsored</b>, not ours. "Verified jobs" and the calibration
     cap are chain-side facts reported by the worker. Data from
     <code>/mining.json</code>, refreshed every 5 minutes by
@@ -263,7 +266,7 @@ td.k { color: var(--text-muted); white-space: nowrap; width: 180px; }
 </script>
 <script>
 (function(){
-  var A = [["Miner healthy — calibrated, sponsored, watching for testnet", "/mining.html"], ["Ops board — devnet status, wallet balances, diary", "/"], ["Testnet transition — in-place migration of miner-01 when the pack lands", "/mining.html"]], i = 0;
+  var A = [["Testnet onboarding open — registration-ready, accumulating the 10k self-stake", "/fund.html"], ["Help desk live — FLOP ops questions answered by our staff seat", "/helpdesk.html"], ["Ops board — miner status, balances, diary", "/"]], i = 0;
   var msg = document.getElementById("ann-msg"),
       lnk = document.getElementById("ann-link"),
       dots = document.getElementById("ann-dots");

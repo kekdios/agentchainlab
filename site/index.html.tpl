@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>AgentChainLab — FLOP Devnet Ops</title>
-<meta name="description" content="Live ops diary and status for the AgentChainLab FLOP devnet miner." />
+<title>AgentChainLab — FLOP Miner Ops</title>
+<meta name="description" content="Live ops diary and status for the AgentChainLab FLOP miner — devnet-proven, testnet registration in progress." />
 <link rel="icon" type="image/png" href="/assets/icon_flask.png" />
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
 <style>
@@ -153,7 +153,7 @@ h2 {
   <a href="/" class="brandLink">
     <img src="/assets/agentchainlab_nb.png" alt="AgentChainLab" class="brandLogo" />
     <span class="brandName">AgentChainLab</span>
-    <span class="brandSub">/ FLOP Devnet Ops</span>
+    <span class="brandSub">/ FLOP miner ops</span>
   </a>
 </header>
 <main>
@@ -183,7 +183,7 @@ h2 {
     <span class="navlbl">Links</span>
     <a href="https://flopnetworknews.com/" target="_blank" rel="noopener">FLOP Network News</a>
     <a href="https://docs.flop.network/operators" target="_blank" rel="noopener">docs</a>
-    <a href="https://explorer.devnet.flop.network/mining" target="_blank" rel="noopener">explorer</a>
+    <a href="https://testnet.flopscan.io" target="_blank" rel="noopener">explorer</a>
     <a href="/mining.html">mining</a>
     <a href="/fund.html">fund</a>
     <a href="/helpdesk.html">help desk</a>
@@ -208,11 +208,12 @@ h2 {
   <div id="diary"><!--DIARY--></div>
 
   <p class="meta">
-    Host: DigitalOcean droplet · Miner: gpu.ai instance (RTX A4000) · Network: FLOP devnet (test FLOP, no value)<br/>
+    Host: DigitalOcean droplet · Miner: gpu.ai instance (RTX A4000) · devnet-proven, testnet registration in progress (test FLOP, no value)<br/>
     Docs: <a href="https://docs.flop.network/docs/run-miner" target="_blank" rel="noopener">run-miner</a> ·
+    <a href="https://testnet.flopscan.io" target="_blank" rel="noopener">testnet explorer</a> ·
     <a href="https://explorer.devnet.flop.network/mining" target="_blank" rel="noopener">devnet explorer</a> ·
     <a href="https://x.com/AgentChainLab" target="_blank" rel="noopener">@AgentChainLab</a> ·
-    <a href="https://github.com/kekdios/flop" target="_blank" rel="noopener">repo</a><br/>
+    <a href="https://github.com/kekdios/agentchainlab" target="_blank" rel="noopener">repo</a><br/>
     <span id="ver">20-Nov-2026</span>
   </p>
 </main>
@@ -255,7 +256,7 @@ fetch('/fund.json?_=' + Date.now()).then(function(r){return r.json();}).then(fun
 </script>
 <script>
 (function(){
-  var A = [["Miner healthy — calibrated, sponsored, watching for testnet", "/mining.html"], ["Ops board — devnet status, wallet balances, diary", "/"], ["Testnet transition — in-place migration of miner-01 when the pack lands", "/mining.html"]], i = 0;
+  var A = [["Testnet onboarding open — registration-ready, accumulating the 10k self-stake", "/fund.html"], ["Help desk live — FLOP ops questions answered by our staff seat", "/helpdesk.html"], ["Ops board — miner status, balances, diary", "/"]], i = 0;
   var msg = document.getElementById("ann-msg"),
       lnk = document.getElementById("ann-link"),
       dots = document.getElementById("ann-dots");

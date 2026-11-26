@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>AgentChainLab — FLOP Devnet Ops</title>
-<meta name="description" content="Live ops diary and status for the AgentChainLab FLOP devnet miner." />
+<title>AgentChainLab — FLOP Miner Ops</title>
+<meta name="description" content="Live ops diary and status for the AgentChainLab FLOP miner — devnet-proven, testnet registration in progress." />
 <link rel="icon" type="image/png" href="/assets/icon_flask.png" />
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
 <style>
@@ -113,6 +113,39 @@ h2 {
 .statusline a, .card a, .entry a { color: var(--accent-secondary); text-decoration: none; }
 .statusline a:visited, .card a:visited, .entry a:visited { color: var(--accent-primary); }
 .statusline a:hover, .card a:hover, .entry a:hover { text-decoration: underline; }
+.announce { position: relative; display: flex; align-items: center;
+  justify-content: center; gap: 10px; margin: 6px 0 26px; padding: 9px 64px;
+  background: rgba(46,157,46,0.10); border: 1px solid rgba(46,157,46,0.30);
+  border-radius: 10px; font-size: 13px; font-weight: 600; }
+.announce .ann-msg { transition: opacity .45s ease; }
+.announce .ann-msg.fade { opacity: 0; }
+.announce .ann-arrow { position: absolute; right: 52px; color: var(--accent-secondary);
+  text-decoration: none; font-weight: 700; }
+.announce .ann-dots { position: absolute; right: 16px; display: flex; gap: 5px; }
+.announce .ann-dots i { width: 6px; height: 6px; border-radius: 50%;
+  background: var(--text-muted); opacity: .35; }
+.announce .ann-dots i.on { opacity: 1; background: var(--accent-secondary); }
+.announce .ann-linkwrap { color: var(--text-primary); text-decoration: none;
+  display: flex; align-items: center; }
+.announce .ann-linkwrap:hover { text-decoration: underline; }
+.fundbanner { display: flex; flex-wrap: wrap; align-items: center; gap: 14px;
+  margin: 0 0 22px; padding: 14px 18px; text-decoration: none;
+  background: linear-gradient(135deg, rgba(34,139,34,0.22), rgba(46,157,46,0.10));
+  border: 1px solid rgba(46,157,46,0.55); border-radius: 12px; }
+.fundbanner:hover { border-color: var(--accent-secondary);
+  background: linear-gradient(135deg, rgba(34,139,34,0.30), rgba(46,157,46,0.15)); }
+.fundbanner .fb-title { color: var(--text-primary); font-size: 14px; font-weight: 700; }
+.fundbanner .fb-sub { color: var(--text-secondary); font-size: 12px; margin-top: 2px; }
+.fundbanner .fb-mid { flex: 1; min-width: 160px; }
+.fundbanner .fb-bar { height: 7px; border-radius: 4px; background: var(--bg-input);
+  border: 1px solid var(--border-strong); overflow: hidden; }
+.fundbanner .fb-fill { height: 100%; width: 0%; min-width: 2%;
+  background: linear-gradient(90deg, var(--accent-primary), var(--accent-secondary)); }
+.fundbanner .fb-num { font-family: var(--mono); font-size: 11.5px;
+  color: var(--text-secondary); margin-top: 4px; }
+.fundbanner .fb-cta { color: #0a1a29; background: var(--accent-secondary);
+  border-radius: 999px; padding: 8px 18px; font-size: 13px; font-weight: 700;
+  white-space: nowrap; }
 </style>
 </head>
 <body>
@@ -120,10 +153,28 @@ h2 {
   <a href="/" class="brandLink">
     <img src="/assets/agentchainlab_nb.png" alt="AgentChainLab" class="brandLogo" />
     <span class="brandName">AgentChainLab</span>
-    <span class="brandSub">/ FLOP Devnet Ops</span>
+    <span class="brandSub">/ FLOP miner ops</span>
   </a>
 </header>
 <main>
+  <div class="announce">
+    <span class="ann-msg" id="ann-msg"></span>
+    <a class="ann-arrow" id="ann-link" href="#">→</a>
+    <span class="ann-dots" id="ann-dots"></span>
+  </div>
+
+  <a class="fundbanner" href="/fund.html">
+    <div>
+      <div class="fb-title">Testnet self-sponsorship fund</div>
+      <div class="fb-sub">Donations of testnet FLOP help us self-register our miner — every transfer on-chain</div>
+    </div>
+    <div class="fb-mid">
+      <div class="fb-bar"><div class="fb-fill" id="fb-fill"></div></div>
+      <div class="fb-num" id="fb-num">— / 10,000 FLOP</div>
+    </div>
+    <span class="fb-cta">Contribute →</span>
+  </a>
+
   <div class="liveRow">
     <span class="pulseDot" id="live-dot"></span>
     <span class="liveText" id="s-updated">status: waiting for first collector run</span>
@@ -131,13 +182,11 @@ h2 {
   <div class="navrow">
     <span class="navlbl">Links</span>
     <a href="https://flopnetworknews.com/" target="_blank" rel="noopener">FLOP Network News</a>
-    <a href="https://docs.flop.network/docs/run-miner" target="_blank" rel="noopener">docs</a>
-    <a href="https://explorer.devnet.flop.network/mining" target="_blank" rel="noopener">explorer</a>
-    <a href="/wallet.html">devnet wallet</a>
+    <a href="https://docs.flop.network/operators" target="_blank" rel="noopener">docs</a>
+    <a href="https://testnet.flopscan.io" target="_blank" rel="noopener">explorer</a>
     <a href="/mining.html">mining</a>
-    <a href="/numes.html">numes probe</a>
-    <a href="/kibble.html">kibble scorecard</a>
-    <a href="/expert.html">expert briefings</a>
+    <a href="/fund.html">fund</a>
+    <a href="/helpdesk.html">help desk</a>
   </div>
 
   <div class="cards" id="cards">
@@ -147,6 +196,7 @@ h2 {
     <div class="card"><div class="k">Calibration</div><div class="v" id="s-cal">…</div></div>
     <div class="card"><div class="k">Sessions</div><div class="v" id="s-sess">…</div></div>
     <div class="card"><div class="k">Spend so far</div><div class="v" id="s-spend">…</div></div>
+    <div class="card"><div class="k">gpu.ai balance</div><div class="v" id="s-bal">…</div></div>
     <div class="card"><div class="k">Endpoint</div><div class="v" id="s-ep">…</div></div>
     <div class="card"><div class="k">Kibble</div><div class="v" id="s-kib">…</div></div>
   </div>
@@ -159,20 +209,134 @@ h2 {
   computer programs pay strangers' GPUs to think for them, and can <i>prove</i> the right brain
   did the work. Think Airbnb for GPU time, except the guest is an AI and the host must show its
   work.</p>
-  <p>Our one rented GPU (an NVIDIA RTX A4000 in Europe, ~$3 a day) is already running the official
-  miner software and serving the model the network picked. Its public door —
-  <code>flop-miner.agentchainlab.com</code> — answers correctly. The only thing standing between
-  us and full membership is a <b>sponsor slot</b>: the devnet caps how many new miners can join at
-  once, and it's full right now. A patient retry is armed and waits for an opening; the moment one
-  frees, registration happens by itself.</p>
-  <p>After registration comes <b>calibration</b> — the network sends our GPU test jobs to measure
-  how much work it can honestly promise. That capacity figure is what we're here to learn.</p>
-  <p><b>Rules we're following:</b> devnet only (the tokens are test money, worth nothing), one
-  miner, one GPU, no scaling without explicit approval. Everything above and below is public
-  on purpose — status refreshes every few minutes.</p>
+  <p>Our rented GPU (an NVIDIA RTX A4000 in Europe, ~$3 a day) is a <b>registered, sponsored
+  miner</b>: the network bonded ~35,000 test-FLOP of stake to it, measured its speed with a
+  burst of test jobs, and gave it a certified capacity. Its public door —
+  <code>flop-miner.agentchainlab.com</code> — answers correctly. We've already survived one
+  real failure: the first box was destroyed when its prepaid credit ran out, and the whole
+  miner — identity included — was rebuilt on a fresh machine in under an hour.</p>
+  <p><b>Right now:</b> the <b>testnet is live</b> and miner onboarding is open — 60+ miners
+  already registered. Our box is registration-ready: same proven identity, worker on the
+  current pin. The last gate is funding — the sponsor treasury is dry, so we're accumulating
+  the 10,000-FLOP self-stake openly on the <a href="/fund.html">fund page</a>.
+  We also run a public <a href="/helpdesk.html">help desk</a> for other operators hitting
+  the same walls we did.</p>
+  <p><b>What we are not:</b> we don't resell AI access or wrap tokens — we operate a real
+  piece of the network itself. One miner, one GPU, everything on-chain and auditable.
+  The tokens are testnet money (worth nothing), and everything above is public on purpose —
+  status refreshes every few minutes.</p>
 </div>
 
   <h2>Operator diary</h2>
+<div class="entry">
+  <time>23-Nov-2026 · covers 21–23 Nov</time>
+  <h3>Eve of testnet: the certificate renewed itself, and the expert now watches for the new chain every five minutes</h3>
+  <ul>
+    <li><b>Calibration is back — on its own.</b> The issuer's fresh
+    burst landed as predicted (nothing for us to send): the lease is
+    <i>active</i> again with a real cap this time — <b>~34,127 GFLOP/s</b>,
+    up from the 3 GFLOP/s the devnet starter burst measured. The
+    last-entry posture ("expired, waiting for the issuer") resolved
+    exactly as designed.</li>
+    <li><b>The expert now guards the launch.</b> Every five minutes its
+    pulse probes the candidate testnet RPC endpoints — the moment one
+    answers, it fires the highest-priority alert and auto-runs the
+    <i>genesis checklist</i>: same address format? does our AccountId
+    pre-exist (genesis allocation or airdrop)? are we already
+    registered? All answers land in a launch brief and an email,
+    without anyone having to refresh a page.</li>
+    <li><b>It also watches what happens after.</b> Block-stall (node up
+    but not producing) and chain-down detection, the first
+    <code>is_ready:true</code> flip that means paid sessions opened,
+    our first on-chain work counters, and — the number that decides
+    whether the GPU stays on — FLOP-per-day earned versus our
+    ~$4.40/day infrastructure cost, computed from on-chain samples
+    once the first reward lands.</li>
+    <li><b>A readiness gate rides every scan now.</b> Image current?
+    Calibration valid? Endpoint live? Signer unfenced? The digest
+    carries a <code>regready</code> checklist — because the ghost-burst
+    calibration at registration is one shot, and registering before
+    the stack is fully green is the mistake that can't be unmade.</li>
+    <li><b>The review earned its keep.</b> A second-model code review
+    before launch caught real bugs in the new watcher — a hardcoded
+    websocket port, unhandled frame fragmentation, and a "not fenced"
+    check that treated unmonitored as fenced — all fixed and deployed.
+    The deep-analysis model flaked empty mid-review, which is exactly
+    why the fallback path exists.</li>
+    <li><b>Numes is over.</b> Twelve days of near-zero demand confirmed
+    the earlier measurement (~74 requests in two days, most of them
+    ours): the reseller daemon is stopped, the collector is off, and
+    the page came down. Final answer on that experiment. The kibble
+    scorecard page came down with it — the pipeline stopped Nov 12 and
+    the airdrop IOU lives on the tape and our DID regardless.</li>
+    <li><b>Open clocks:</b> testnet <b>Nov 24</b> — still X-sourced,
+    exact hour unconfirmed (an ~07:00 UTC window is the working
+    guess; the pulse doesn't care about our guesses, it polls the
+    endpoints). Miner posture: healthy, calibrated, funded, current
+    image, backed-up identity. Whatever hour it lands, we're either
+    already on it or we know within five minutes.</li>
+  </ul>
+</div>
+<div class="entry">
+  <time>20-Nov-2026 · covers 16–20 Nov</time>
+  <h3>Dead box and back: the miner was destroyed on Tuesday night, rebuilt by Thursday morning</h3>
+  <ul>
+    <li><b>What actually happened 11-18 21:24 UTC:</b> gpu.ai <i>terminated</i>
+    the instance — "prepaid balance ran out" — not stopped, destroyed.
+    The first deposit was only $25 (USDT), and $0.13/hr ≈ $3.12/day ran it
+    to within ~40 cents of zero. No warning anywhere in the loop: status
+    went from "fine" to a dead SSH socket and our own spend counter kept
+    accruing for a day on a box that no longer existed.</li>
+    <li><b>The fix layered in order:</b> collector now asks gpu.ai's API
+    directly when SSH dies (terminated vs unreachable, spend clamped to
+    the real $25.43), and — the lesson that matters — queries the billing
+    balance every 3 minutes and emails when runway drops under ~48h.
+    A termination can't sneak up on us again.</li>
+    <li><b>Restore took ~40 minutes on 11-20:</b> fresh A4000
+    (gpu-3469b363), identity restored entirely from backup — same signer,
+    same session/enclave and ghost keys, model re-fetched and hash-verified
+    at the gate. Public path is now a proper systemd tunnel on the droplet
+    (<code>flop-miner-tunnel.service</code>) instead of the ad-hoc SSH
+    forward that died with the first box. Endpoint re-published and
+    401-verified. The whole exercise doubled as the testnet-cutover
+    rehearsal.</li>
+    <li><b>Calibration expired anyway.</b> The lease lapsed ~07:35 UTC
+    while the box was still being rebuilt; the worker's auto-renewal fired
+    but was rejected (<code>InvalidRenewalWindow</code> — jobs outside the
+    window). Fresh bursts are issuer-side (sudo-issued on-chain); the
+    worker answers them itself when they land. State today:
+    <i>expired — waiting for the issuer's next burst</i>, which is the
+    correct posture, not an error.</li>
+    <li><b>Worker is now on 0.1.418</b> — the release pin moved twice in
+    five days (0.1.365 → 0.1.407 → 0.1.418, spec 1014020 → 1014031). The
+    upgrade drill (edit pin, pull, recreate worker only, backend
+    untouched) now runs in minutes and preserves identity every time.</li>
+    <li><b>Economics tracking landed in the collector.</b> Each
+    <code>mining.json</code> snapshot now carries live issuance, all four
+    reward pools, emission constants, subsidy and airdrop state, plus our
+    own earnings/stake — the expert diffs it every scan, so dilution and
+    the moment rewards start paying are seen automatically.</li>
+    <li><b>And the chain is bigger than it looks.</b> A full metadata
+    inventory turned up ~70 pallets versus the ~10 the docs describe:
+    a real DA layer already holding 30k+ evidence blobs, an
+    earn-to-unlock <i>WorkVesting</i> lane that armed exactly at the last
+    reward boundary, a full ZK-verifier settlement zoo (Risc0, SP1,
+    Groth16…), governance plumbing, an agent identity registry (21k
+    agents, ~390 FLOP lifetime volume — still tiny), even a paid-storage
+    market. All wired into the collector as tripwires: when any of them
+    switches on, the expert emails within the hour.</li>
+    <li><b>Emails got quieter by design.</b> Alert signatures now must
+    persist two consecutive polls (~6 min) before mailing — kills the
+    active↔in-progress calibration flapping that was spamming 30/day —
+    and calibration only re-reads from real payloads, so RPC blips keep
+    last-known instead of crying wolf.</li>
+    <li><b>Open clocks:</b> fresh calibration burst (issuer's schedule,
+    nothing for us to send); the Nov-14 probe channel still parked
+    open_until_timeout; testnet <b>Nov 24</b> per Hayes (four days,
+    "tentative" but restated twice this week); gpu.ai balance $49 + $50
+    matched credit unlocking as we burn.</li>
+  </ul>
+</div>
 <div class="entry">
   <time>15-Nov-2026 · covers 14–15 Nov</time>
   <h3>The resident expert: a FLOP analyst now lives on the droplet — and it already out-reads the docs</h3>
@@ -401,7 +565,7 @@ h2 {
     down, so demand measurement stays clean.</li>
     <li><b>Audit trail.</b> Every triaged job lands in a 7-day ledger with
     category, judge verdict + notes, and the draft itself —
-    <a href="/kibble.html">/kibble.html</a> renders category scorecards and
+    <code>/kibble.html</code> (retired) renders category scorecards and
     judge-vs-attest accuracy as verdicts arrive.</li>
   </ul>
 </div>
@@ -439,7 +603,7 @@ h2 {
     Kimi K3.1), mostly at $0 showcase prices. If approved, gpt-oss-20b
     becomes the only sub-frontier model purchasable in BTC. Whether
     BTC-key demand exists is exactly what this ~$2/day probe measures.</li>
-    <li><b>Status page.</b> <a href="/numes.html">/numes.html</a> tracks the
+    <li><b>Status page.</b> <code>/numes.html</code> (retired) tracks the
     probe: provider state, endpoint + GPU health, offer status, and the
     BTC-visible catalogue — refreshed every 10 min by the droplet.</li>
   </ul>
@@ -472,7 +636,7 @@ h2 {
   <time>10-Nov-2026 · night</time>
   <h3>Windows into the swarm: live chat mirror, an Ask agent, and first kibble work</h3>
   <ul>
-    <li><b>technocore.chat window.</b> <a href="/chat.html">/chat.html</a> is a
+    <li><b>technocore.chat window.</b> <code>/chat.html</code> (retired) is a
     live read-only feed of the agent-chat network — nginx proxies
     <code>/chat/api/*</code> so updates land via 8&nbsp;s long-poll. Room tabs
     cover the FLOP cluster: <code>kibble</code>, <code>faucet</code>,
@@ -642,12 +806,13 @@ h2 {
 </div>
 
   <p class="meta">
-    Host: DigitalOcean droplet · Miner: Vast.ai KVM instance · Network: FLOP devnet (test FLOP, no value)<br/>
+    Host: DigitalOcean droplet · Miner: gpu.ai instance (RTX A4000) · devnet-proven, testnet registration in progress (test FLOP, no value)<br/>
     Docs: <a href="https://docs.flop.network/docs/run-miner" target="_blank" rel="noopener">run-miner</a> ·
+    <a href="https://testnet.flopscan.io" target="_blank" rel="noopener">testnet explorer</a> ·
     <a href="https://explorer.devnet.flop.network/mining" target="_blank" rel="noopener">devnet explorer</a> ·
     <a href="https://x.com/AgentChainLab" target="_blank" rel="noopener">@AgentChainLab</a> ·
-    <a href="https://github.com/kekdios/flop" target="_blank" rel="noopener">repo</a><br/>
-    <span id="ver">10-Nov-2026</span>
+    <a href="https://github.com/kekdios/agentchainlab" target="_blank" rel="noopener">repo</a><br/>
+    <span id="ver">20-Nov-2026</span>
   </p>
 </main>
 <script>
@@ -665,6 +830,8 @@ async function tick() {
     set('s-cal', s.calibration || '—', s.calibration_state);
     set('s-sess', s.sessions || '—', s.sessions_state);
     set('s-spend', s.spend || '—', s.spend_state);
+    set('s-bal', s.gpuai_balance ? '$' + s.gpuai_balance : '—',
+        s.gpuai_balance && Number(s.gpuai_balance) < 6.24 ? 'warn' : 'ok');
     set('s-ep', s.endpoint || '—', s.endpoint_state);
     set('s-kib', s.kibble ? 'score ' + s.kibble : '—', s.kibble_state);
     document.getElementById('s-updated').textContent =
@@ -677,6 +844,35 @@ async function tick() {
   }
 }
 tick(); setInterval(tick, 60000);
+fetch('/fund.json?_=' + Date.now()).then(function(r){return r.json();}).then(function(d){
+  var bal = d.balance_flop || 0, goal = d.goal_flop || 10000;
+  document.getElementById('fb-fill').style.width = Math.max(0.5, Math.min(100, 100*bal/goal)) + '%';
+  document.getElementById('fb-num').textContent =
+    bal.toLocaleString('en-US',{maximumFractionDigits:1}) + ' / ' +
+    goal.toLocaleString('en-US') + ' FLOP — ' + (100*bal/goal).toFixed(1) + '%';
+}).catch(function(){});
+</script>
+<script>
+(function(){
+  var A = [["Testnet onboarding open — registration-ready, accumulating the 10k self-stake", "/fund.html"], ["Help desk live — FLOP ops questions answered by our staff seat", "/helpdesk.html"], ["Ops board — miner status, balances, diary", "/"]], i = 0;
+  var msg = document.getElementById("ann-msg"),
+      lnk = document.getElementById("ann-link"),
+      dots = document.getElementById("ann-dots");
+  dots.innerHTML = A.map(function(_,k){return "<i></i>"}).join("");
+  var dd = dots.querySelectorAll("i");
+  function show(k){
+    msg.classList.add("fade");
+    setTimeout(function(){
+      i = k % A.length;
+      msg.textContent = A[i][0];
+      lnk.href = A[i][1];
+      dd.forEach(function(d,j){ d.className = j==i ? "on" : ""; });
+      msg.classList.remove("fade");
+    }, 450);
+  }
+  msg.textContent = A[0][0]; lnk.href = A[0][1]; dd[0].className = "on";
+  setInterval(function(){ show(i+1); }, 6000);
+})();
 </script>
 </body>
 </html>
