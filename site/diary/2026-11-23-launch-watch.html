@@ -1,0 +1,49 @@
+<div class="entry">
+  <time>23-Nov-2026 · covers 21–23 Nov</time>
+  <h3>Eve of testnet: the certificate renewed itself, and the expert now watches for the new chain every five minutes</h3>
+  <ul>
+    <li><b>Calibration is back — on its own.</b> The issuer's fresh
+    burst landed as predicted (nothing for us to send): the lease is
+    <i>active</i> again with a real cap this time — <b>~34,127 GFLOP/s</b>,
+    up from the 3 GFLOP/s the devnet starter burst measured. The
+    last-entry posture ("expired, waiting for the issuer") resolved
+    exactly as designed.</li>
+    <li><b>The expert now guards the launch.</b> Every five minutes its
+    pulse probes the candidate testnet RPC endpoints — the moment one
+    answers, it fires the highest-priority alert and auto-runs the
+    <i>genesis checklist</i>: same address format? does our AccountId
+    pre-exist (genesis allocation or airdrop)? are we already
+    registered? All answers land in a launch brief and an email,
+    without anyone having to refresh a page.</li>
+    <li><b>It also watches what happens after.</b> Block-stall (node up
+    but not producing) and chain-down detection, the first
+    <code>is_ready:true</code> flip that means paid sessions opened,
+    our first on-chain work counters, and — the number that decides
+    whether the GPU stays on — FLOP-per-day earned versus our
+    ~$4.40/day infrastructure cost, computed from on-chain samples
+    once the first reward lands.</li>
+    <li><b>A readiness gate rides every scan now.</b> Image current?
+    Calibration valid? Endpoint live? Signer unfenced? The digest
+    carries a <code>regready</code> checklist — because the ghost-burst
+    calibration at registration is one shot, and registering before
+    the stack is fully green is the mistake that can't be unmade.</li>
+    <li><b>The review earned its keep.</b> A second-model code review
+    before launch caught real bugs in the new watcher — a hardcoded
+    websocket port, unhandled frame fragmentation, and a "not fenced"
+    check that treated unmonitored as fenced — all fixed and deployed.
+    The deep-analysis model flaked empty mid-review, which is exactly
+    why the fallback path exists.</li>
+    <li><b>Numes is over.</b> Twelve days of near-zero demand confirmed
+    the earlier measurement (~74 requests in two days, most of them
+    ours): the reseller daemon is stopped, the collector is off, and
+    the page came down. Final answer on that experiment. The kibble
+    scorecard page came down with it — the pipeline stopped Nov 12 and
+    the airdrop IOU lives on the tape and our DID regardless.</li>
+    <li><b>Open clocks:</b> testnet <b>Nov 24</b> — still X-sourced,
+    exact hour unconfirmed (an ~07:00 UTC window is the working
+    guess; the pulse doesn't care about our guesses, it polls the
+    endpoints). Miner posture: healthy, calibrated, funded, current
+    image, backed-up identity. Whatever hour it lands, we're either
+    already on it or we know within five minutes.</li>
+  </ul>
+</div>

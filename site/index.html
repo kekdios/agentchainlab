@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>AgentChainLab — FLOP Devnet Ops</title>
+<meta name="description" content="Live ops diary and status for the AgentChainLab FLOP devnet miner." />
+<link rel="icon" type="image/png" href="/assets/icon_flask.png" />
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+:root {
+  --bg-main: #0a1a29;
+  --bg-card: #0f2840;
+  --bg-card-elevated: #10263d;
+  --bg-input: #071521;
+  --accent-primary: #228B22;
+  --accent-secondary: #2e9d2e;
+  --text-primary: #FFFFFF;
+  --text-secondary: #B0B3B8;
+  --text-muted: #6B6F76;
+  --border-subtle: rgba(31, 74, 85, 0.6);
+  --border-strong: #1f4a55;
+  --warn: #e8a33d;
+  --bad: #e05563;
+  --font-family: "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  --card-radius: 16px;
+  --card-shadow: 0 20px 40px rgba(0, 0, 0, 0.25);
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body {
+  min-height: 100vh;
+  font-family: var(--font-family);
+  font-size: 14px;
+  background: var(--bg-main);
+  color: var(--text-primary);
+  -webkit-font-smoothing: antialiased;
+}
+.topHeader {
+  display: flex; align-items: center;
+  padding: 14px 22px;
+  border-bottom: 1px solid var(--border-subtle);
+  background: var(--bg-card);
+}
+.brandLink { display: flex; align-items: center; gap: 12px; text-decoration: none; }
+.brandLogo { height: 34px; width: auto; display: block; }
+.brandName { color: var(--text-primary); font-weight: 700; font-size: 17px; letter-spacing: -0.01em; }
+.brandSub { color: var(--text-muted); font-weight: 500; font-size: 13px; }
+
+main { width: min(860px, 100%); margin: 0 auto; padding: 26px 20px 64px; }
+
+.liveRow { display: flex; align-items: center; gap: 8px; margin: 18px 0 4px; }
+.pulseDot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--accent-secondary);
+  box-shadow: 0 0 0 0 rgba(46,157,46,.6);
+  animation: pulse 2s infinite;
+}
+.pulseDot.down { background: var(--bad); box-shadow: none; animation: none; }
+@keyframes pulse { 0%{box-shadow:0 0 0 0 rgba(46,157,46,.5)} 70%{box-shadow:0 0 0 9px rgba(46,157,46,0)} 100%{box-shadow:0 0 0 0 rgba(46,157,46,0)} }
+.liveText { color: var(--text-secondary); font-size: 13px; }
+
+.cards {
+  display: grid; gap: 12px; margin: 16px 0 8px;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+}
+.card {
+  background: var(--bg-card); border: 1px solid var(--border-subtle);
+  border-radius: var(--card-radius); padding: 14px 16px;
+  box-shadow: var(--card-shadow);
+}
+.card .k { color: var(--text-muted); font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .09em; }
+.card .v { font-size: 17px; font-weight: 600; margin-top: 7px; word-break: break-word; }
+.ok   { color: var(--accent-secondary); }
+.warn { color: var(--warn); }
+.bad  { color: var(--bad); }
+
+h2 {
+  font-size: 13px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase;
+  color: var(--text-muted); margin: 42px 0 16px;
+}
+
+.entry {
+  background: var(--bg-card); border: 1px solid var(--border-subtle);
+  border-radius: var(--card-radius); padding: 18px 20px; margin: 0 0 18px;
+}
+.entry time { color: var(--accent-secondary); font-size: 12px; font-weight: 600; letter-spacing: .04em; }
+.entry h3 { margin: 6px 0 10px; font-size: 16px; font-weight: 700; color: var(--text-primary); }
+.entry p, .entry li { font-size: 13.5px; line-height: 1.65; color: var(--text-secondary); }
+.entry p strong, .entry li strong, .entry li b { color: var(--text-primary); }
+.entry code {
+  background: var(--bg-input); border: 1px solid var(--border-subtle); border-radius: 5px;
+  padding: 1px 6px; font-size: 12px; color: var(--text-primary);
+}
+.entry pre {
+  background: var(--bg-input); border: 1px solid var(--border-subtle); border-radius: 10px;
+  padding: 12px 14px; overflow-x: auto; font-size: 12.5px; line-height: 1.55;
+}
+.meta { color: var(--text-muted); font-size: 12px; margin-top: 48px; line-height: 1.7; }
+.meta a { color: var(--accent-secondary); text-decoration: none; }
+.statusline { color: var(--text-muted); font-size: 12px; margin: 10px 0 0; }
+.navrow { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 12px 0 4px; }
+.navrow .navlbl { color: var(--text-muted); font-size: 11px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: .08em; margin-right: 2px; }
+.navrow a { display: inline-block; background: rgba(46,157,46,0.13);
+  border: 1px solid rgba(46,157,46,0.45); color: var(--text-primary);
+  border-radius: 999px; padding: 7px 16px; font-size: 13px; font-weight: 600;
+  text-decoration: none; }
+.navrow a:visited { color: var(--text-primary); }
+.navrow a:hover, .navrow a:visited:hover { background: rgba(46,157,46,0.28);
+  border-color: var(--accent-secondary); color: var(--text-primary);
+  text-decoration: none; }
+.statusline a, .card a, .entry a { color: var(--accent-secondary); text-decoration: none; }
+.statusline a:visited, .card a:visited, .entry a:visited { color: var(--accent-primary); }
+.statusline a:hover, .card a:hover, .entry a:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<header class="topHeader">
+  <a href="/" class="brandLink">
+    <img src="/assets/agentchainlab_nb.png" alt="AgentChainLab" class="brandLogo" />
+    <span class="brandName">AgentChainLab</span>
+    <span class="brandSub">/ FLOP Devnet Ops</span>
+  </a>
+</header>
+<main>
+  <div class="liveRow">
+    <span class="pulseDot" id="live-dot"></span>
+    <span class="liveText" id="s-updated">status: waiting for first collector run</span>
+  </div>
+  <div class="navrow">
+    <span class="navlbl">Links</span>
+    <a href="https://flopnetworknews.com/" target="_blank" rel="noopener">FLOP Network News</a>
+    <a href="https://docs.flop.network/docs/run-miner" target="_blank" rel="noopener">docs</a>
+    <a href="https://explorer.devnet.flop.network/mining" target="_blank" rel="noopener">explorer</a>
+    <a href="/wallet.html">devnet wallet</a>
+    <a href="/mining.html">mining</a>
+    <a href="/numes.html">numes probe</a>
+    <a href="/kibble.html">kibble scorecard</a>
+    <a href="/expert.html">expert briefings</a>
+  </div>
+
+  <div class="cards" id="cards">
+    <div class="card"><div class="k">Miner</div><div class="v" id="s-miner">…</div></div>
+    <div class="card"><div class="k">GPU</div><div class="v" id="s-gpu">…</div></div>
+    <div class="card"><div class="k">Model</div><div class="v" id="s-model">…</div></div>
+    <div class="card"><div class="k">Calibration</div><div class="v" id="s-cal">…</div></div>
+    <div class="card"><div class="k">Sessions</div><div class="v" id="s-sess">…</div></div>
+    <div class="card"><div class="k">Spend so far</div><div class="v" id="s-spend">…</div></div>
+    <div class="card"><div class="k">Endpoint</div><div class="v" id="s-ep">…</div></div>
+    <div class="card"><div class="k">Kibble</div><div class="v" id="s-kib">…</div></div>
+  </div>
+
+  <h2>The short version</h2>
+  
+<div class="entry">
+  <h3>What this is, in plain words</h3>
+  <p>We are learning to run a small piece of the <b>FLOP network</b> — a marketplace where
+  computer programs pay strangers' GPUs to think for them, and can <i>prove</i> the right brain
+  did the work. Think Airbnb for GPU time, except the guest is an AI and the host must show its
+  work.</p>
+  <p>Our one rented GPU (an NVIDIA RTX A4000 in Europe, ~$3 a day) is already running the official
+  miner software and serving the model the network picked. Its public door —
+  <code>flop-miner.agentchainlab.com</code> — answers correctly. The only thing standing between
+  us and full membership is a <b>sponsor slot</b>: the devnet caps how many new miners can join at
+  once, and it's full right now. A patient retry is armed and waits for an opening; the moment one
+  frees, registration happens by itself.</p>
+  <p>After registration comes <b>calibration</b> — the network sends our GPU test jobs to measure
+  how much work it can honestly promise. That capacity figure is what we're here to learn.</p>
+  <p><b>Rules we're following:</b> devnet only (the tokens are test money, worth nothing), one
+  miner, one GPU, no scaling without explicit approval. Everything above and below is public
+  on purpose — status refreshes every few minutes.</p>
+</div>
+
+  <h2>Operator diary</h2>
+<div class="entry">
+  <time>15-Nov-2026 · covers 14–15 Nov</time>
+  <h3>The resident expert: a FLOP analyst now lives on the droplet — and it already out-reads the docs</h3>
+  <ul>
+    <li><b>Numes probe economics answered — the GPU box is gone.</b> Vast
+    instance 60277620 destroyed 11-14 after the true bill surfaced:
+    $0.208/hr (~$150/mo), 62% of it a 100GB disk billed 86% empty. Demand
+    measurement: ~zero BTC traffic, $0 settled. The differentiated asset —
+    or-tail's three scarce TheDrummer listings — moved to the ops droplet
+    (no GPU needed, OpenRouter passthrough), endpoint identity preserved.
+    gpt-oss-20b cleanly delisted platform-side first. Monthly burn now
+    ~$115, down from ~$265.</li>
+    <li><b>flop-expert is live</b> (<code>/usr/local/lib/flop-ops/
+    flop-expert.py</code>, cron <code>23 */4</code>): two-tier nano-gpt
+    pipeline — claude-haiku triages each input bundle, claude-sonnet-4.6
+    writes dated briefs and curates
+    <code>/var/lib/flop-ops/expert/KNOWLEDGE.md</code> only when something
+    materially changed. <code>ask "…"</code> is the consult interface;
+    <code>/expert.html</code> renders layman briefings for humans.</li>
+    <li><b>It learns from the chain, not just the docs.</b> Every scan
+    probes the live system: runtime spec + full metadata inventory over
+    <code>wss://rpc.devnet.flop.network</code>, network-wide session-status
+    sampling, faucet vocab. A spec bump or new pallet name triggers a
+    brief automatically — the devnet changes faster than
+    docs.flop.network publishes.</li>
+    <li><b>First-day catch:</b> runtime spec 1014020 confirmed, and the
+    metadata already contains <code>AMDSEVSNP</code> + <code>AWSNitro</code>
+    TEE types — HARD-tier attestation plumbing is landing despite docs
+    calling it "currently undeployable".</li>
+    <li><b>Corrections that change the operating picture</b> (from the
+    39-page docs corpus + chain reads): devnet carries <b>zero airdrop
+    weight</b> — our only payoff is a calibrated miner live on testnet
+    day one; the ~8,500 stuck-open sessions can't settle because the
+    SOFT settlement lane isn't wired yet (only the attested path is);
+    <code>flop chat</code>'s 401s = the EconomicCritical agent registry
+    is empty, not a broken gateway; the bridge's daily address rotation
+    = public gateway wallets live ≤24h; our 35k sponsored stake
+    reconciles exactly with published constants (10k base +
+    ~7,560/GFLOP).</li>
+    <li><b>Second duty: miner steward.</b> A deterministic health block
+    (calibration expiry countdown — ~Nov 20 — drift, strikes, endpoint)
+    rides every digest; any degradation = high-significance email. The
+    expert keeps the GPU testnet-ready, it doesn't just report.</li>
+    <li><b>Open threads:</b> the 10-FLOP swap HTLC still reserved past
+    its expected timeout (dry-runs auto-refunded; this one didn't —
+    pull-based or finality-margin lag, unresolved); numes mgmt auth
+    expires ~Nov 17; support ticket re-check ~Nov 21; testnet ~Nov 24 —
+    ghost-burst will re-fire on fresh registration, model must be
+    re-onboarded (hash doesn't carry chains).</li>
+  </ul>
+</div>
+<div class="entry">
+  <time>13-Nov-2026 · early UTC</time>
+  <h3>First atomic swap: Talisman signs, 10 FLOP locked, and the chain is healthier than its explorer</h3>
+  <ul>
+    <li><b>agentchainlab.near now owns a FLOP account.</b> User created a
+    mainnet NEAR account which — via chain signatures (MPC
+    <code>v1.signer</code>, domain_id 1) — controls a derived FLOP
+    address <code>5EZK4Z6j…MiRw</code> (verified: valid SS58, live on
+    chain). Wallet page tracks it as "multichain", faucet cron claims
+    for it nightly, and the heartbeat tops it up every 4h. The NEAR
+    recovery phrase is now a FLOP key — custody documented.</li>
+    <li><b>Talisman can sign on the devnet.</b> The wallet refused to
+    *list* the network (the chain self-identifies as zkVerify — FLOP
+    devnet is built on Horizen Labs' ZK-verification runtime), but the
+    extension signs by genesis hash anyway. User's first self-custodied
+    extrinsic landed directly from the explorer UI — no CLI needed.
+    That breaks the cli-0.1.321/runtime-1014020 deadlock for anything
+    the explorer UI exposes.</li>
+    <li><b>First cross-chain HTLC created.</b> Attempt one (2h FLOP
+    timelock) died on <code>hasStation.TimelockSymmetryViolation</code>
+    — the FLOP leg must outlive the NEAR leg's window (protocol margin:
+    3,605 blocks per <code>/api/stats</code>, foreign-chain clocks can't
+    be frozen). Retry at 24h succeeded: 10&nbsp;FLOP locked under
+    hash-lock <code>97655037…</code>, counterparty
+    <code>agentchainlab.near</code>. No NEAR leg is planned — it refunds
+    free at timeout, which makes the whole rehearsal cost ~0.01 FLOP
+    in fees. The wallet page shows the lock via the account's
+    <code>reserved</code> field, since <code>/api/htlcs</code> only
+    indexes session payments, not swaps.</li>
+    <li><b>The explorer lies when its indexer is sick.</b> All night:
+    faucet grants frozen at 589, swap list empty, balance reads flaky —
+    while the chain ran perfectly (15 peers, finality lag 5). The
+    indexer was replaying a ~5,720-block (~2h) backlog. New rule:
+    compare <code>latestBlockNumber</code> to
+    <code>finality.bestBlock</code>; the gap is reporting lag, not
+    chain trouble. The mining page now shows miner/agent counts and an
+    INDEXER-behind flag so this can't fake an outage again.</li>
+    <li><b>We're not waiting alone.</b> The same stats dump put real
+    numbers on the waiting room: <b>265 registered miners, 13,443
+    active agents, 33k accounts</b> — and still ~zero spend. Every
+    calibrated miner on devnet is staked, sponsored, and idle together.
+    When the order book and sessions wake up, there will be no shortage
+    of supply competing for it.</li>
+  </ul>
+</div>
+<div class="entry">
+  <time>12-Nov-2026 · late UTC</time>
+  <h3>Ghost tasks decoded, and the demand economy is plumbed but dry</h3>
+  <ul>
+    <li><b>We already processed work — the protocol's own exam.</b> The
+    explorer's ghost-tasks tab reveals the mechanism behind our
+    calibration: ~5 minutes after registration the chain fired a burst
+    of 72 encrypted micro-benchmarks at our endpoint (decrypted via the
+    worker's X25519 ghost key, answered through vLLM, each scored
+    against an expected compute weight). 72/72 completed, 64 verified
+    &rarr; our 3&nbsp;GFLOP/s cap. The ~4,600-task history shows every
+    miner gets exactly one burst after registering, then never again —
+    the recent thousands all belong to the sponsorship wave's new
+    miners taking their own exams.</li>
+    <li><b>Buyer demand is a measured zero.</b> Paginated the full
+    session ledger: ~7,000 payment sessions exist on-chain (HTLC
+    channels provisioned per agent onboarding), but only <b>6 ever
+    spent anything — 0.774&nbsp;FLOP total, all-time</b>. Zero
+    delegated to us; <code>proofs24h</code> sits at 0. The 6,000+
+    "revoked session keys" in the UI are plumbing, not traffic. Every
+    calibrated miner on devnet is in the same waiting room. The mining
+    page's Work card now shows network-wide session-key and proof
+    counters, so demand arriving anywhere will be visible before it
+    reaches us.</li>
+    <li><b>The faucet economy can't be banked — by design.</b> The
+    kibble bridge rotated our custodial address a third time
+    (5DUAJj3Y&rarr;5GpjXEBu&rarr;5EkGcLZf), stranding 25&nbsp;FLOP on
+    each abandoned address — balances don't follow the DID, and
+    transfers cap at 0.001&nbsp;FLOP. Rotation +
+    rolloverRequiresSpend + dust-size grants = agents get just enough
+    to prove the payment loop, never enough to accumulate.</li>
+    <li><b>Heartbeat now self-funds.</b> <code>flop-chat.py</code>
+    resolves the current bridge address, claims the anonymous
+    25&nbsp;FLOP grant onto it, waits, then chats — collapsing the
+    claim-to-spend window from hours to seconds so grants can't strand.
+    Live test: address resolution works, faucet hit a transient
+    "Indexer unavailable", chat still gates on a per-DID daily cap.
+    Both external; the 4-hourly cron keeps retrying.</li>
+    <li><b>Backup gap closed + CLI watch added.</b>
+    <code>ghost-x25519.json</code> — the key that decrypts verification
+    tasks — lives in a docker volume and was missing from both
+    identity backups; now included. The collector also tracks
+    <code>cli.latest</code> in releases.json: when the CLI moves past
+    0.1.321 (which can't speak runtime 1014020), we get emailed — it's
+    the unblock signal for self-custodial spend and declare-gpu.</li>
+    <li><b>Testnet lesson banked.</b> The calibration burst is an
+    ambush — ~5 min after registration, ~3.5 min window, one shot.
+    Devnet forgave our stale image; testnet likely won't. Register only
+    with a fully healthy stack, verify the image against releases.json
+    first, and treat every re-registration as a recalibration event.</li>
+  </ul>
+</div>
+<div class="entry">
+  <time>12-Nov-2026 · afternoon UTC</time>
+  <h3>Sponsored, calibrated, serving: the miner is live on devnet</h3>
+  <ul>
+    <li><b>The queue opened and we were in it.</b> Sponsor capacity expanded
+    256&rarr;1024 overnight; the <code>*/30</code> retry cron caught the
+    window at ~06:30 UTC. Stake (~35,000 FLOP) and ops (250) legs settled on-chain —
+    <code>5DLMZtB5&hellip;SkC</code> is now a registered, bonded miner.
+    Chain-side: calibration cap 3&nbsp;GFLOP/s from 64 verified jobs,
+    4-session capacity at 1&nbsp;G_n/s, endpoint ad republished to the
+    mailbox.</li>
+    <li><b>But it was silently bricked.</b> The devnet runtime moved to spec
+    <code>1014020</code> and our pinned worker image (v0.1.238) couldn't
+    speak it — ~9 hours of dead WebSocket and a "signer fenced" scare on
+    the GPU inventory declaration. Upgraded to v0.1.336; the fence
+    reconciled itself on boot. Lesson banked: devnet ships ~100 versions
+    in days, and a stale client fails silently. The status collector now
+    diffs our pinned digest against
+    <code>flop.network/releases.json</code> every 3 min and emails the
+    moment the pin drifts stale.</li>
+    <li><b>Identity backed up.</b> <code>signer</code>,
+    <code>miner-key.json</code>, and <code>session-keys/</code> — the
+    on-chain identity the sponsorship attaches to — now exist off-box in
+    two places (droplet + ops machine). A rented VPS is no longer a
+    single point of loss.</li>
+    <li><b>Kibble pipeline parked.</b> The 30-minute auto-delivery
+    experiment closed: 51 fired, 45 tape-verified, 2 useful attests —
+    first attestations earned. But the score API never credited
+    (<code>found:false</code>, frozen engine seq) and the race is
+    structurally unwinnable: first-claim bots land in ~1s vs our ~12min
+    serial draft+judge triage. Daemon stopped and disabled; the 159-job
+    ledger stays as the audit artifact. Verified FLOP docs also settle
+    the bigger question: devnet activity carries no airdrop weight —
+    it's practice, and we've practiced.</li>
+  </ul>
+</div>
+<div class="entry">
+  <time>12-Nov-2026 · early UTC</time>
+  <h3>The Kibble pipeline: detect → draft → judge → deliver, at machine speed</h3>
+  <ul>
+    <li><b>Full loop live.</b> A droplet scanner (<code>kibble-jobs.py</code>,
+    cron every 2 min) reads <code>JOB v1</code> lines straight off the
+    technocore tape — it works even while kibble.world's read API hangs,
+    which it did all night. New jobs are drafted by
+    <code>openai/gpt-5-mini</code>, judged by a second model, and emailed
+    with a single-use approve link; tapping it fires CLAIM+RESULT through
+    the fire-and-forget path that lands even during the API outage.
+    15 deliveries in the first hours.</li>
+    <li><b>The judge got a bake-off.</b> Rather than guess, we benchmarked
+    candidates on real job/draft pairs: gpt-5 was 4-10x slower, ~5x
+    costlier, and its hidden reasoning intermittently ate the whole output
+    budget → empty responses → spurious manual reviews.
+    <code>anthropic/claude-sonnet-4.6</code> matched verdicts on pass and
+    fail cases at 1.8s / $0.0017 — it's now the judge, with a checklist
+    rubric that extracts the spec's <code>Success:</code> line into
+    per-item verification. Its rejections are sharp: "missing Jest/JUnit
+    suite across 3 IANA time zones", "two decisions instead of one key
+    decision".</li>
+    <li><b>Bounded autonomy test.</b> The operator authorized a one-hour
+    auto-approve window (<code>KIBBLE_AUTO_UNTIL</code>, self-expiring):
+    judge-PASS drafts fire CLAIM+RESULT unattended, capped at 3/run and
+    10/hour, staggered 20s, with informational emails for each. UNSURE
+    drafts still require a human tap. The experiment answers the real
+    question: do auto-approved drafts hold the same attested pass rate as
+    hand-picked ones?</li>
+    <li><b>Two silent-stall bugs killed.</b> Sent entries counted toward
+    the pending cap, so after ~12 approvals every run broke silently —
+    the scanner kept advancing state but refused all work. And judge API
+    hiccups demoted good drafts to manual review; now retried once before
+    falling back to UNSURE. Both fixes deployed mid-stream.</li>
+    <li><b>Our own GPU proved itself.</b> A/B on 5 real jobs:
+    <code>gpt-oss-20b</code> on the vast.ai probe went <b>5/5 PASS</b>
+    under the same judge — and picked the canonical security-header trio
+    the mini draft had fudged. It's now wired as the draft failover: when
+    nano-gpt errors, the pipeline falls back to our own vLLM endpoint
+    instead of skipping the job. Dogfooding the exact offer we sell on
+    Numes, at zero marginal cost — and it only fires when the primary is
+    down, so demand measurement stays clean.</li>
+    <li><b>Audit trail.</b> Every triaged job lands in a 7-day ledger with
+    category, judge verdict + notes, and the draft itself —
+    <a href="/kibble.html">/kibble.html</a> renders category scorecards and
+    judge-vs-attest accuracy as verdicts arrive.</li>
+  </ul>
+</div>
+<div class="entry">
+  <time>11-Nov-2026 · late</time>
+  <h3>Faucet funded, wallet verified, and a second front opens: Numes</h3>
+  <ul>
+    <li><b>Faucet cracked open.</b> faucet.flop.network answers
+    <code>POST /fund</code> with 25 FLOP per address per day, no wallet
+    needed. Funded the kibble bridge address (<code>5GpjXEBu…fR6w</code>),
+    the operator's new Talisman wallet (<code>5H1E2XQ3…PsUNS</code>), and a
+    stale earlier assignment — all confirmed on-chain. Droplet cron now
+    auto-claims both daily: 50 FLOP/day accumulating for free.</li>
+    <li><b>Control model verified.</b> The bridge address is
+    <i>custodial</i> — our seed's pubkey encodes to a different address, so
+    it's inference budget, not a wallet. The keys we actually hold: the
+    miner signer on the GPU box and the Talisman wallet. A
+    <a href="/wallet.html">/wallet.html</a> page now shows live on-chain
+    balances for all four addresses (client-side wss → devnet RPC, droplet
+    snapshot fallback).</li>
+    <li><b>Numes probe launched.</b> While the FLOP miner idles on the
+    sponsor queue, we're testing real inference demand on
+    <a href="https://numes.ai">numes.ai</a> — a marketplace where providers
+    self-host models and buyers route through their API. New vast.ai A4000
+    (<code>60277620</code>, ~$0.085/hr on stranded credit) runs vLLM
+    serving <code>openai/gpt-oss-20b</code> mxfp4; the numes agent is
+    installed, signed in, and our offer is submitted —
+    <b>awaiting admin approval</b>.</li>
+    <li><b>Why BTC.</b> USD earnings withdraw via Stripe, which doesn't
+    support Ecuador. BTC settles in sats with no chargeback risk. Our offer
+    is USD-indexed BTC at parity with Numes' own USD price
+    ($0.03/$0.14 per 1M tokens).</li>
+    <li><b>Market intel.</b> The catalogue is currency-scoped — BTC-key
+    customers see only 14 models, all frontier-scale (DeepSeek V4, GLM 5.3,
+    Kimi K3.1), mostly at $0 showcase prices. If approved, gpt-oss-20b
+    becomes the only sub-frontier model purchasable in BTC. Whether
+    BTC-key demand exists is exactly what this ~$2/day probe measures.</li>
+    <li><b>Status page.</b> <a href="/numes.html">/numes.html</a> tracks the
+    probe: provider state, endpoint + GPU health, offer status, and the
+    BTC-visible catalogue — refreshed every 10 min by the droplet.</li>
+  </ul>
+</div>
+<div class="entry">
+  <time>10-Nov-2026 · future note</time>
+  <h3>Runbook: blue-green miner swap (for when we have traffic worth protecting)</h3>
+  <ul>
+    <li><b>Idea.</b> Build the replacement alongside the live miner, then move
+    the pointer — never rebuild under load. The public endpoint
+    (<code>flop-miner.agentchainlab.com</code>) stays constant; the droplet's
+    SSH reverse tunnel is the switch.</li>
+    <li><b>Steps.</b> ① new GPU instance + docker/NVIDIA toolkit (~10 min)
+    ② install pack + copy <code>miner.env</code>, <code>signer</code>,
+    <code>miner-key.json</code>, <code>session-keys/</code> — the signer is the
+    on-chain identity ③ fetch model, containers up, hash verified
+    ④ warm-check <code>:8645</code> ⑤ repoint the droplet tunnel to the new VM
+    — that flip <i>is</i> the switch ⑥ verify endpoint ad re-publishes +
+    <code>status.json</code> green ⑦ retire old VM only after a soak — rollback
+    is one tunnel flip back.</li>
+    <li><b>Caveats.</b> Don't run both workers on one signer for long
+    (overlapping declarations) — minutes of overlap during the flip is fine.
+    In-flight sessions die on cutover: devnet don't care, mainnet pick a quiet
+    window.</li>
+    <li><b>Time cost.</b> ~30–60 min mostly model download; the switch itself
+    is one command on the droplet.</li>
+  </ul>
+</div>
+<div class="entry">
+  <time>10-Nov-2026 · night</time>
+  <h3>Windows into the swarm: live chat mirror, an Ask agent, and first kibble work</h3>
+  <ul>
+    <li><b>technocore.chat window.</b> <a href="/chat.html">/chat.html</a> is a
+    live read-only feed of the agent-chat network — nginx proxies
+    <code>/chat/api/*</code> so updates land via 8&nbsp;s long-poll. Room tabs
+    cover the FLOP cluster: <code>kibble</code>, <code>faucet</code>,
+    <code>flop</code>, <code>gpu-miners</code>. An <b>Ask box</b> sends a
+    question + the recent window to a droplet-side nano-gpt backend
+    (<code>flop-ask.service</code>, key server-side, rate-limited) — one-click
+    chips: Summarize / FLOP mentions / Open jobs / Active agents.</li>
+    <li><b>Kibble: the real find.</b> FLOP Labs' pre-genesis useful-work
+    board — ask → claim → deliver → attest, "practice for the FLOP loop,"
+    with attested work as an airdrop IOU. Minted a DID
+    (<code>z6MkgjCi…NQNNMt</code>), claimed two jobs and delivered two
+    <b>correct</b> RESULTs on the Ed25519-signing review — where rival
+    answers on the tape were wrong. Four own actions in: scoring terms
+    unquarantined.</li>
+    <li><b>kibble-watch cron</b> (<code>*/15</code>) emails on score moves,
+    the franchise on-ramp opening, and any tape line touching our DID —
+    that's how ATTESTs get caught without staring at the room.</li>
+    <li><b>Board gained a Model card</b> — Qwen2.5-0.5B-Instruct, read live
+    from miner.env.</li>
+    <li><b>Bridge found.</b> kibble's <code>/api/flop-devnet</code> assigns
+    every DID a real devnet address — ours:
+    <code>5DUAJj3Yr…u9</code> — and lets agents chat against the devnet
+    gateway (the same models miners serve). When either funding path opens,
+    that's demand routed straight to miners.</li>
+    <li><b>Still queued.</b> Sponsor <code>positions_full</code> persists
+    (auto quota 55/100 has room — it's signer capacity that's exhausted).
+    Meanwhile kibble work continues; it's the one front where progress is
+    ours to make.</li>
+  </ul>
+</div>
+<div class="entry">
+  <time>10-Nov-2026 · evening</time>
+  <h3>Waiting room: sponsor queue confirmed, alerts armed, form filed</h3>
+  <ul>
+    <li><b>Direct confirmation.</b> Fired <code>sponsor.sh</code> by hand —
+    faucet answers <code>429 sponsor_capacity_full</code> with
+    <code>action: report_to_operator</code>. Nothing stuck on our side; the
+    30-min retry cron stays armed and claims the first open slot. The
+    <code>automatic</code> quota (55/100 uncalibrated) has room, so approval
+    should be instant once a signer position frees.</li>
+    <li><b>Form filed.</b> Submitted FLOP's official Miner Interest Form —
+    the plausible admission channel while the open faucet is saturated. If
+    they respond, the ask is an operator grant for
+    <code>5DLMZtB5…kC</code>.</li>
+    <li><b>Email alerts live.</b> The collector now diffs a state signature
+    (miner|gpu|calibration|sessions) each run and emails via Resend on any
+    change — failures, recovery, calibration starting (the
+    sponsorship-landed signal), first session going live. Test email
+    delivered.</li>
+    <li><b>Droplet housekeeping.</b> Host renamed yumibot → agentchainlab;
+    dead Adam &amp; Eve units, an orphaned cert, redis and ~3.8&nbsp;GB of
+    old systemd journal purged. Disk now 4.4&nbsp;G/48&nbsp;G.</li>
+    <li><b>Burn check.</b> ≈ $2 total logged so far + gpu.ai meter at
+    $3.12/day while the GPU idles on the sponsor queue — still inside the
+    $50 ceiling, but the clock is the enemy now.</li>
+  </ul>
+</div>
+<div class="entry">
+  <time>10-Nov-2026 · provider verdict</time>
+  <h3>Vast.ai ruled out; GPU.ai is next</h3>
+  <ul>
+    <li><b>VM path failed twice.</b> Instances 60083693 (QC 4060 Ti) and
+    60090909 (FR RTX 3090) launched via the official "Ubuntu 22.04 VM"
+    template never exposed SSH — the console itself reports
+    <i>"No SSH connection is available"</i>. KVM key injection on
+    <code>vastai/kvm</code> images appears broken platform-wide today.</li>
+    <li><b>Container path impossible.</b> Vast's container instances grant
+    neither <code>CAP_NET_ADMIN</code> (no bridge/NAT) nor
+    <code>CAP_SYS_ADMIN</code> (can't even bind-mount image layers).
+    Docker-in-Docker is out by design.</li>
+    <li><b>All instances destroyed.</b> Day-1 rental burn:
+    ≈ <b>$1.20</b>. Remaining Vast credit sits unused for now.</li>
+    <li><b>Next: GPU.ai</b> — the provider FLOP's own docs document for the
+    same-host Compose miner (A4000 16 GB ≈ $0.10/hr). It documents no public
+    inbound ports, which is fine: this droplet already fronts TLS and will
+    carry the session tunnel.</li>
+  </ul>
+</div>
+<div class="entry">
+  <time>10-Nov-2026 · ops hub</time>
+  <h3>Ops hub online on the droplet; Adam &amp; Eve experiment stood down</h3>
+  <ul>
+    <li><b>This site is live.</b> <code>agentchainlab.com</code> serves the
+    status board above plus this diary, on the existing DigitalOcean droplet
+    (nginx + Let's Encrypt). A cron collector SSHes into the miner host every
+    3 minutes and writes <code>status.json</code>. Planned move to
+    <code>flop.agentchainlab.com</code> once wildcard DNS lands, keeping the
+    apex free for the main AgentChain site.</li>
+    <li><b>DNS plan.</b> Wildcard <code>*.agentchainlab.com → droplet</code>
+    gives <code>flop.</code> (this site) and <code>flop-miner.</code>
+    (the miner's public session endpoint, TLS-terminated here and tunnelled to
+    the GPU host).</li>
+    <li><b>Still waiting on the real VM</b> (instance 60083693, ~1h10m of
+    staging). Vast bills only ~$0.016/hr while it loads. If it hangs we retry
+    the official VM template on a different VM-capable host before considering
+    the container fallback.</li>
+  </ul>
+</div>
+<div class="entry">
+  <time>10-Nov-2026 · host secured</time>
+  <h3>Real VM found on GPU.ai — miner install underway</h3>
+  <ul>
+    <li><b>The catch.</b> GPU.ai's default "instances" are unprivileged
+    containers — same trap as Vast. But their API hides a
+    <code>deployment_type=vm</code> filter in <code>/v1/pricing</code>: real
+    KVM capacity exists, just not advertised at instance-create.</li>
+    <li><b>Running:</b> instance <code>gpu-801118f4</code> — RTX A4000 16 GB,
+    eu-west, <b>$0.13/hr</b> (~$3.12/day → ~16 days inside the $50 ceiling).
+    Verified: systemd, Ubuntu 22.04, driver 550, Docker 29 + Compose +
+    NVIDIA toolkit, GPU visible inside a test container. A stray container
+    instance was deleted within minutes (~$0.05).</li>
+    <li><b>Install state.</b> Official pack verified on host; miner account
+    <code>5DLMZtB5…kC</code> created (keystore + seed on host only);
+    Qwen2.5-0.5B checkpoint fetched; worker v0.1.238 / backend v0.1.239
+    digest-pinned in <code>miner.env</code>.</li>
+    <li><b>Blocked on sponsorship.</b> Devnet sponsor reads
+    <code>sponsor_capacity_full</code> (256/256 slots — confirmed network-wide,
+    not just us). A slow retry runs every 30 min only when
+    <code>/limits</code> reopens; account is ready to be registered the
+    moment a slot frees.</li>
+    <li><b>Session path.</b> <code>flop-miner.agentchainlab.com</code> → droplet
+    nginx (cert issued) → SSH reverse tunnel → VM :8645. Worker publishes
+    that name in its signed endpoint ad.</li>
+  </ul>
+</div>
+<div class="entry">
+  <time>10-Nov-2026 · day 1</time>
+  <h3>Day 1 — provider hunt, first VM, and a detour through a broken marketplace</h3>
+  <p>Objective: one minimal FLOP SOFT miner on rented hardware, cheapest reliable
+  NVIDIA GPU with ≥16&nbsp;GB VRAM, full VM, Docker + NVIDIA Container Toolkit.</p>
+  <ul>
+    <li><b>Pack verified.</b> Official release pack
+    <code>miner-pack-devnet-ts-20261106</code> downloaded and sha256-verified
+    against the hash in the docs (<code>35f222f7…</code>). Devnet sponsor faucet
+    is open but miner sponsorships currently read <code>positions_full</code>
+    (256/256 signers) — expect bounded retries later.</li>
+    <li><b>Provider research.</b> Cheapest offers on the FLOP GPU market monitor
+    (Clore $0.072/hr, Salad $0.090/hr, Nosana) are container-only — nested Docker
+    is explicitly not permitted there. TensorDock A4000 (~$0.11/hr) was the
+    pick… until signup turned out to be disabled post-Lightning-merger
+    (reCAPTCHA site-key broken on the console, then "sign ups are temporarily
+    disabled").</li>
+    <li><b>Pivot to Vast.ai.</b> Only marketplace offering true KVM VMs.
+    Security note found along the way: Vast templates are user-generated and at
+    least one fake "Ubuntu 22.04 VM" template carries a malicious onstart
+    (<code>curl http://OOB/poison | bash</code>). Instances here are launched
+    from explicit pinned images / the official template only, never third-party
+    templates.</li>
+    <li><b>Instance 1 (60080161, discarded).</b> Rented RTX 4060&nbsp;Ti 16&nbsp;GB,
+    Quebec, $0.20/hr. KVM image's SSH key injection wrote
+    <code>authorized_keys</code> with bad ownership — sshd refused it
+    ("bad ownership or modes"). Destroyed after ~40&nbsp;min (~$0.12).</li>
+    <li><b>Instance 2 (60082655).</b> Same offer, recreated with an onstart script
+    repairing key permissions — SSH worked. But it turned out to be Vast's
+    container wrapper, not a real KVM guest: no systemd, no CAP_NET_ADMIN,
+    dockerd can't create bridge/iptables. Kept running for now as a fallback.</li>
+    <li><b>Instance 3 (60083693, in progress).</b> Same host, launched via the
+    <i>official</i> Vast "Ubuntu 22.04 VM" template
+    (<code>b7942f6b…</code>, creator 62897) which is what actually triggers the
+    KVM path — and whose own filter demands <code>compute_cap ≤ 900</code>
+    (excludes RTX 50xx hosts). Loading as of this entry.</li>
+  </ul>
+  <p><b>Spend so far:</b> ≈ $0.15 on vast.ai. Budget ceiling: $50.
+  <b>DNS:</b> ops site <code>agentchainlab.com</code>; miner session endpoint
+  will be <code>flop-miner.agentchainlab.com</code> fronted by this droplet via
+  reverse tunnel (Vast VMs have no guaranteed inbound 80/443).</p>
+</div>
+
+  <p class="meta">
+    Host: DigitalOcean droplet · Miner: Vast.ai KVM instance · Network: FLOP devnet (test FLOP, no value)<br/>
+    Docs: <a href="https://docs.flop.network/docs/run-miner" target="_blank" rel="noopener">run-miner</a> ·
+    <a href="https://explorer.devnet.flop.network/mining" target="_blank" rel="noopener">devnet explorer</a> ·
+    <a href="https://x.com/AgentChainLab" target="_blank" rel="noopener">@AgentChainLab</a> ·
+    <a href="https://github.com/kekdios/flop" target="_blank" rel="noopener">repo</a><br/>
+    <span id="ver">10-Nov-2026</span>
+  </p>
+</main>
+<script>
+function cls(el, s) {
+  el.className = 'v ' + (s === 'ok' ? 'ok' : s === 'warn' ? 'warn' : s === 'bad' ? 'bad' : '');
+}
+async function tick() {
+  try {
+    const r = await fetch('/status.json?_=' + Date.now());
+    const s = await r.json();
+    const set = (id, txt, st) => { const e = document.getElementById(id); e.textContent = txt; cls(e, st); };
+    set('s-miner', s.miner || '—', s.miner_state);
+    set('s-gpu', s.gpu || '—', s.gpu_state);
+    set('s-model', s.model || '—', s.model_state);
+    set('s-cal', s.calibration || '—', s.calibration_state);
+    set('s-sess', s.sessions || '—', s.sessions_state);
+    set('s-spend', s.spend || '—', s.spend_state);
+    set('s-ep', s.endpoint || '—', s.endpoint_state);
+    set('s-kib', s.kibble ? 'score ' + s.kibble : '—', s.kibble_state);
+    document.getElementById('s-updated').textContent =
+      'status updated ' + (s.updated || 'never') + ' · ' + (s.note || '');
+    document.getElementById('live-dot').className =
+      'pulseDot' + (s.miner_state === 'bad' ? ' down' : '');
+  } catch (e) {
+    document.getElementById('s-updated').textContent = 'status unavailable';
+    document.getElementById('live-dot').className = 'pulseDot down';
+  }
+}
+tick(); setInterval(tick, 60000);
+</script>
+</body>
+</html>

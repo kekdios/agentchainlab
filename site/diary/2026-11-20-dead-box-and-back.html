@@ -1,0 +1,60 @@
+<div class="entry">
+  <time>20-Nov-2026 · covers 16–20 Nov</time>
+  <h3>Dead box and back: the miner was destroyed on Tuesday night, rebuilt by Thursday morning</h3>
+  <ul>
+    <li><b>What actually happened 11-18 21:24 UTC:</b> gpu.ai <i>terminated</i>
+    the instance — "prepaid balance ran out" — not stopped, destroyed.
+    The first deposit was only $25 (USDT), and $0.13/hr ≈ $3.12/day ran it
+    to within ~40 cents of zero. No warning anywhere in the loop: status
+    went from "fine" to a dead SSH socket and our own spend counter kept
+    accruing for a day on a box that no longer existed.</li>
+    <li><b>The fix layered in order:</b> collector now asks gpu.ai's API
+    directly when SSH dies (terminated vs unreachable, spend clamped to
+    the real $25.43), and — the lesson that matters — queries the billing
+    balance every 3 minutes and emails when runway drops under ~48h.
+    A termination can't sneak up on us again.</li>
+    <li><b>Restore took ~40 minutes on 11-20:</b> fresh A4000
+    (gpu-3469b363), identity restored entirely from backup — same signer,
+    same session/enclave and ghost keys, model re-fetched and hash-verified
+    at the gate. Public path is now a proper systemd tunnel on the droplet
+    (<code>flop-miner-tunnel.service</code>) instead of the ad-hoc SSH
+    forward that died with the first box. Endpoint re-published and
+    401-verified. The whole exercise doubled as the testnet-cutover
+    rehearsal.</li>
+    <li><b>Calibration expired anyway.</b> The lease lapsed ~07:35 UTC
+    while the box was still being rebuilt; the worker's auto-renewal fired
+    but was rejected (<code>InvalidRenewalWindow</code> — jobs outside the
+    window). Fresh bursts are issuer-side (sudo-issued on-chain); the
+    worker answers them itself when they land. State today:
+    <i>expired — waiting for the issuer's next burst</i>, which is the
+    correct posture, not an error.</li>
+    <li><b>Worker is now on 0.1.418</b> — the release pin moved twice in
+    five days (0.1.365 → 0.1.407 → 0.1.418, spec 1014020 → 1014031). The
+    upgrade drill (edit pin, pull, recreate worker only, backend
+    untouched) now runs in minutes and preserves identity every time.</li>
+    <li><b>Economics tracking landed in the collector.</b> Each
+    <code>mining.json</code> snapshot now carries live issuance, all four
+    reward pools, emission constants, subsidy and airdrop state, plus our
+    own earnings/stake — the expert diffs it every scan, so dilution and
+    the moment rewards start paying are seen automatically.</li>
+    <li><b>And the chain is bigger than it looks.</b> A full metadata
+    inventory turned up ~70 pallets versus the ~10 the docs describe:
+    a real DA layer already holding 30k+ evidence blobs, an
+    earn-to-unlock <i>WorkVesting</i> lane that armed exactly at the last
+    reward boundary, a full ZK-verifier settlement zoo (Risc0, SP1,
+    Groth16…), governance plumbing, an agent identity registry (21k
+    agents, ~390 FLOP lifetime volume — still tiny), even a paid-storage
+    market. All wired into the collector as tripwires: when any of them
+    switches on, the expert emails within the hour.</li>
+    <li><b>Emails got quieter by design.</b> Alert signatures now must
+    persist two consecutive polls (~6 min) before mailing — kills the
+    active↔in-progress calibration flapping that was spamming 30/day —
+    and calibration only re-reads from real payloads, so RPC blips keep
+    last-known instead of crying wolf.</li>
+    <li><b>Open clocks:</b> fresh calibration burst (issuer's schedule,
+    nothing for us to send); the Nov-14 probe channel still parked
+    open_until_timeout; testnet <b>Nov 24</b> per Hayes (four days,
+    "tentative" but restated twice this week); gpu.ai balance $49 + $50
+    matched credit unlocking as we burn.</li>
+  </ul>
+</div>

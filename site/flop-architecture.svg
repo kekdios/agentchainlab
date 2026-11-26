@@ -1,0 +1,99 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 620" font-family="ui-monospace,Menlo,Consolas,monospace" font-size="13">
+  <defs>
+    <marker id="arr" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto">
+      <path d="M0,0 L9,4.5 L0,9 z" fill="#8ab4f8"/>
+    </marker>
+    <marker id="arr2" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto">
+      <path d="M0,0 L9,4.5 L0,9 z" fill="#f8b48a"/>
+    </marker>
+  </defs>
+
+  <rect width="960" height="620" fill="#0d1117"/>
+  <text x="480" y="34" fill="#e6edf3" font-size="19" text-anchor="middle" font-weight="bold">FLOP — the agent-inference marketplace (devnet, as observed)</text>
+  <text x="480" y="54" fill="#8b949e" text-anchor="middle">demand posts escrowed work · miners serve · validators verify · the HTLC settles — no cashier to trust</text>
+
+  <!-- AGENTS -->
+  <rect x="60" y="90" width="200" height="110" rx="10" fill="#161b22" stroke="#58a6ff" stroke-width="2"/>
+  <text x="160" y="114" fill="#58a6ff" text-anchor="middle" font-weight="bold">AGENTS / BROKERS</text>
+  <text x="160" y="134" fill="#c9d1d9" text-anchor="middle">the demand side</text>
+  <text x="160" y="152" fill="#8b949e" text-anchor="middle">post jobs · open session</text>
+  <text x="160" y="168" fill="#8b949e" text-anchor="middle">lock escrow · attest results</text>
+  <text x="160" y="188" fill="#7ee787" text-anchor="middle">10% of emission (planned)</text>
+
+  <!-- MINERS -->
+  <rect x="380" y="90" width="200" height="110" rx="10" fill="#161b22" stroke="#f8b48a" stroke-width="2"/>
+  <text x="480" y="114" fill="#f8b48a" text-anchor="middle" font-weight="bold">MINERS</text>
+  <text x="480" y="134" fill="#c9d1d9" text-anchor="middle">the supply side (GPU)</text>
+  <text x="480" y="152" fill="#8b949e" text-anchor="middle">staked · calibrated · serve</text>
+  <text x="480" y="168" fill="#8b949e" text-anchor="middle">inference + TOPLOC proofs</text>
+  <text x="480" y="188" fill="#7ee787" text-anchor="middle">75% emission · 85% of fees</text>
+  <text x="480" y="208" fill="#d2a8ff" text-anchor="middle" font-size="11">← us: A4000 · cap 3 GFLOP/s · sponsored</text>
+
+  <!-- VALIDATORS -->
+  <rect x="700" y="90" width="200" height="110" rx="10" fill="#161b22" stroke="#3fb950" stroke-width="2"/>
+  <text x="800" y="114" fill="#3fb950" text-anchor="middle" font-weight="bold">VALIDATORS</text>
+  <text x="800" y="134" fill="#c9d1d9" text-anchor="middle">consensus + verification</text>
+  <text x="800" y="152" fill="#8b949e" text-anchor="middle">no GPU · spot-check work</text>
+  <text x="800" y="168" fill="#8b949e" text-anchor="middle">(~2.5% rate on our session)</text>
+  <text x="800" y="188" fill="#7ee787" text-anchor="middle">10% emission · 15% of fees</text>
+
+  <!-- HTLC escrow -->
+  <rect x="300" y="270" width="360" height="84" rx="10" fill="#1c2230" stroke="#d2a8ff" stroke-width="2"/>
+  <text x="480" y="294" fill="#d2a8ff" text-anchor="middle" font-weight="bold">SESSION HTLC — the "cashier" that isn't a person</text>
+  <text x="480" y="314" fill="#c9d1d9" text-anchor="middle">escrow LOCKED → inFlight → committed → settled</text>
+  <text x="480" y="332" fill="#8b949e" text-anchor="middle">settle pays out · timeout refunds · 6,776 sessions indexed</text>
+
+  <!-- CORE HOST -->
+  <rect x="60" y="270" width="200" height="84" rx="10" fill="#161b22" stroke="#8b949e" stroke-width="2" stroke-dasharray="5,4"/>
+  <text x="160" y="294" fill="#8b949e" text-anchor="middle" font-weight="bold">CORE HOST (protocol)</text>
+  <text x="160" y="314" fill="#8b949e" text-anchor="middle">ghost tasks = synthetic work</text>
+  <text x="160" y="332" fill="#8b949e" text-anchor="middle">calibration burst · ~5 min after reg</text>
+
+  <!-- STAKERS -->
+  <rect x="700" y="270" width="200" height="84" rx="10" fill="#161b22" stroke="#8b949e" stroke-width="2" stroke-dasharray="5,4"/>
+  <text x="800" y="294" fill="#8b949e" text-anchor="middle" font-weight="bold">COMMUNITY STAKERS</text>
+  <text x="800" y="314" fill="#8b949e" text-anchor="middle">delegation exists on-chain</text>
+  <text x="800" y="332" fill="#7ee787" text-anchor="middle">5% emission (planned)</text>
+
+  <!-- Flow arrows -->
+  <line x1="260" y1="132" x2="374" y2="132" stroke="#8ab4f8" stroke-width="2" marker-end="url(#arr)"/>
+  <text x="317" y="122" fill="#8ab4f8" text-anchor="middle" font-size="11">job + escrow</text>
+
+  <line x1="580" y1="132" x2="694" y2="132" stroke="#8ab4f8" stroke-width="2" marker-end="url(#arr)"/>
+  <text x="637" y="122" fill="#8ab4f8" text-anchor="middle" font-size="11">proofs</text>
+
+  <line x1="160" y1="200" x2="160" y2="264" stroke="#8ab4f8" stroke-width="1.6" marker-end="url(#arr)"/>
+  <line x1="260" y1="300" x2="294" y2="300" stroke="#8ab4f8" stroke-width="2" marker-end="url(#arr)"/>
+  <text x="276" y="290" fill="#8ab4f8" text-anchor="middle" font-size="11">lock</text>
+
+  <line x1="480" y1="200" x2="480" y2="264" stroke="#f8b48a" stroke-width="2" marker-end="url(#arr2)"/>
+  <text x="492" y="232" fill="#f8b48a" font-size="11">work obligations</text>
+
+  <line x1="660" y1="300" x2="694" y2="300" stroke="#8ab4f8" stroke-width="2" marker-end="url(#arr)"/>
+  <text x="677" y="290" fill="#8ab4f8" text-anchor="middle" font-size="11">verify</text>
+
+  <line x1="800" y1="200" x2="800" y2="264" stroke="#8ab4f8" stroke-width="1.6" marker-end="url(#arr)"/>
+
+  <line x1="160" y1="354" x2="330" y2="354" stroke="#8b949e" stroke-width="1.4" stroke-dasharray="4,3" marker-end="url(#arr)"/>
+  <line x1="300" y1="354" x2="430" y2="205" stroke="#8b949e" stroke-width="1.4" stroke-dasharray="4,3" marker-end="url(#arr)"/>
+  <text x="280" y="380" fill="#8b949e" font-size="11" text-anchor="middle">ghost tasks → new miners get calibrated (our 72-task burst → cap 3)</text>
+
+  <!-- Settlement path -->
+  <rect x="300" y="420" width="360" height="66" rx="10" fill="#161b22" stroke="#3fb950" stroke-width="1.5"/>
+  <text x="480" y="443" fill="#3fb950" text-anchor="middle" font-weight="bold">SETTLEMENT</text>
+  <text x="480" y="463" fill="#c9d1d9" text-anchor="middle">work settles → 85% miner / 15% validator</text>
+  <text x="480" y="479" fill="#8b949e" text-anchor="middle">or timeout → escrow refunds to agent</text>
+  <line x1="480" y1="354" x2="480" y2="414" stroke="#8ab4f8" stroke-width="2" marker-end="url(#arr)"/>
+
+  <!-- Emission bar -->
+  <text x="60" y="535" fill="#8b949e" font-size="12">96 FLOP/block emission:</text>
+  <rect x="60" y="545" width="630" height="24" fill="#f8b48a" opacity="0.85"/>
+  <rect x="690" y="545" width="84" height="24" fill="#3fb950" opacity="0.85"/>
+  <rect x="774" y="545" width="84" height="24" fill="#58a6ff" opacity="0.85"/>
+  <rect x="858" y="545" width="42" height="24" fill="#d2a8ff" opacity="0.85"/>
+  <text x="375" y="561" fill="#0d1117" text-anchor="middle" font-weight="bold">75% miners</text>
+  <text x="732" y="561" fill="#0d1117" text-anchor="middle" font-size="11" font-weight="bold">10% val.</text>
+  <text x="816" y="561" fill="#0d1117" text-anchor="middle" font-size="11" font-weight="bold">10% agents</text>
+  <text x="879" y="561" fill="#0d1117" text-anchor="middle" font-size="9" font-weight="bold">5%</text>
+  <text x="60" y="590" fill="#8b949e" font-size="11">+ separate 16 FLOP/block Labs+Foundation subsidy · FLOP takes 0% of session fees · community-staker share undistributed for now</text>
+</svg>

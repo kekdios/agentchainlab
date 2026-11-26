@@ -1,0 +1,10 @@
+.DS_Store
+pack/*.tar.gz
+pack/flop-miner-pack-*/
+node_modules/
+do-tokens.env
+*.env
+.devin/config.local.json
+contracts/out/
+contracts/cache/
+contracts/broadcast/
