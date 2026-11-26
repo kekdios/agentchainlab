@@ -186,6 +186,7 @@ h2 {
     <a href="https://explorer.devnet.flop.network/mining" target="_blank" rel="noopener">explorer</a>
     <a href="/mining.html">mining</a>
     <a href="/fund.html">fund</a>
+    <a href="/helpdesk.html">help desk</a>
   </div>
 
   <div class="cards" id="cards">
