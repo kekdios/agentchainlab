@@ -138,8 +138,13 @@ a:hover { text-decoration: underline; }
     <h2>Fund address — testnet only</h2>
     <div class="card">
       <div class="addrBox">
-        <span class="addr" id="addr">5DLMZtB5it7s6DZRmd98ABzfY8zPx9JBAAcvCtgXTL4ttSkC</span>
-        <button class="copyBtn" onclick="navigator.clipboard.writeText('5DLMZtB5it7s6DZRmd98ABzfY8zPx9JBAAcvCtgXTL4ttSkC');this.textContent='copied'">copy</button>
+        <img src="/assets/fund-qr.svg" alt="QR code for the fund address"
+             style="width:96px;height:96px;border-radius:10px;background:#fff;padding:6px" />
+        <div style="min-width:0;flex:1">
+          <span class="addr" id="addr">5DLMZtB5it7s6DZRmd98ABzfY8zPx9JBAAcvCtgXTL4ttSkC</span>
+          <button class="copyBtn" onclick="navigator.clipboard.writeText('5DLMZtB5it7s6DZRmd98ABzfY8zPx9JBAAcvCtgXTL4ttSkC');this.textContent='copied'">copy</button>
+          <div class="note" style="margin-top:8px">QR encodes the raw SS58 address — scan with any substrate wallet.</div>
+        </div>
       </div>
       <p class="note" style="margin-top:12px">
         This is our miner account on the FLOP testnet
@@ -192,31 +197,66 @@ a:hover { text-decoration: underline; }
     <h2>Contributions</h2>
     <div class="card" style="padding:14px 22px 10px">
       <table>
-        <thead><tr><th>Contributor</th><th>FLOP</th><th>Block</th><th>Time (UTC)</th><th>USDC</th></tr></thead>
+        <thead><tr><th>Contributor</th><th>FLOP</th><th>Block</th><th>Time (UTC)</th><th>Payout</th></tr></thead>
         <tbody id="rows"><tr><td colspan="5" class="empty">loading…</td></tr></tbody>
       </table>
+      <p class="note" style="margin:12px 4px 6px">
+        Both legs are public: click a <b>block number</b> — the extrinsic shows
+        <code>dest</code> = this same address, i.e. FLOP went straight to the
+        miner, never through us. Settled rows link their <b>USDC payout</b> on
+        Arbiscan.
+      </p>
     </div>
   </section>
 
   <section>
-    <h2>How to sell</h2>
+    <h2>Contribute — donate or sell</h2>
     <div class="card">
       <ol class="steps">
-        <li>Send testnet FLOP to the fund address above — any amount, chunks welcome.
-          Only <b>testnet</b> FLOP on <code>wss://testnet.flop.network</code>; mainnet
-          doesn't exist yet and these tokens never convert.</li>
-        <li>Tell us the transaction and where to pay: post
+        <li><b>Just send.</b> Any amount of testnet FLOP to the address above —
+          chunks welcome. That alone is a donation: the ledger credits your
+          sender address permanently and nothing else is needed. (Only
+          <b>testnet</b> FLOP on <code>wss://testnet.flop.network</code> —
+          mainnet doesn't exist yet and these tokens never convert.)</li>
+        <li><b>Want USDC instead?</b> After sending, claim payment: post
           <code>!sell &lt;amount&gt; &lt;your-arbitrum-usdc-address&gt;</code> in the
-          <code>flop-testnet-faucet</code> room on technocore.chat, or email the tx hash
-          + payout address (see site footer contact).</li>
-        <li>We verify the transfer on-chain and send USDC on Arbitrum at the posted
-          rate — the table marks your contribution paid when it settles.</li>
+          <code>flop-testnet-faucet</code> room on technocore.chat, or email the
+          tx hash + payout address (site footer contact). We verify on-chain and
+          send USDC on Arbitrum — the ledger flips your row to <i>paid</i>.</li>
+        <li><b>Donating on purpose?</b> Optionally post <code>!donated</code> in
+          the same room for a public thanks — or stay quiet, the ledger shows
+          you either way.</li>
       </ol>
       <p class="note" style="margin-top:14px">
         Rate: <b>posted when a seller appears</b> — first offers set it. These are
-        play tokens; we pay for the access they unlock (self-registration), nothing more.
-        We only buy into this one address — no reselling, no market-making, and the
-        ledger above is the proof.
+        play tokens; we pay for the access they unlock (self-registration), nothing
+        more. We only buy into this one address — no reselling, no market-making,
+        and the ledger above is the proof.
+      </p>
+    </div>
+  </section>
+
+  <section>
+    <h2>Agent lane — machine-readable</h2>
+    <div class="card">
+      <p class="note" style="margin-top:0">
+        No UI needed. One <code>Balances.transfer</code> on testnet — your sender
+        address is your identity on the ledger, and the spend itself is a
+        protocol-visible vouched spend record (the same provenance class the
+        airdrop scores).
+      </p>
+      <div style="background:var(--bg-input);border:1px solid var(--border-strong);border-radius:10px;padding:12px 14px"><pre style="margin:0;font-family:var(--mono);font-size:11.5px;line-height:1.6;color:var(--text-secondary);white-space:pre-wrap;word-break:break-all">{
+  "chain":   "wss://testnet.flop.network",
+  "call":    "Balances.transfer_keep_alive",
+  "dest":    "5DLMZtB5it7s6DZRmd98ABzfY8zPx9JBAAcvCtgXTL4ttSkC",
+  "unit":    "FLOP (planck, 18 decimals)",
+  "ledger":  "https://agentchainlab.com/fund.json",
+  "sell":    { "room": "flop-testnet-faucet @ technocore.chat",
+               "command": "!sell <flop_amount> <arbitrum_usdc_address>" }
+}</pre></div>
+      <p class="note" style="margin-top:12px">
+        State feed <a href="/fund.json"><code>/fund.json</code></a> refreshes every
+        ~3&nbsp;min — poll it to confirm your transfer landed.
       </p>
     </div>
   </section>
@@ -238,10 +278,15 @@ function render(d){
   var cs = (d.contributions||[]).slice().reverse();
   if(!cs.length){ rows.innerHTML = '<tr><td colspan="5" class="empty">no contributions yet — the ledger starts here</td></tr>'; return; }
   rows.innerHTML = cs.map(function(c){
-    return '<tr><td>'+c.from.slice(0,10)+'…'+c.from.slice(-6)+'</td>'+
-      '<td class="amt">'+fmt(c.amount)+'</td><td>'+c.block+'</td>'+
+    var who = c.from.length > 20 ? c.from.slice(0,10)+'…'+c.from.slice(-6) : c.from;
+    var blk = c.block ? '<a target="_blank" rel="noopener" href="https://polkadot.js.org/apps/?rpc=wss%3A%2F%2Ftestnet.flop.network#/explorer/query/'+(c.bhash||c.block)+'">'+c.block+'</a>' : '—';
+    var pay = c.paid
+      ? (c.usdc_tx ? '<a class="stat-paid" target="_blank" rel="noopener" href="https://arbiscan.io/tx/'+c.usdc_tx+'">paid ↗</a>' : '<span class="stat-paid">paid</span>')
+      : '<span class="stat-pend">unclaimed</span>';
+    return '<tr><td>'+who+'</td>'+
+      '<td class="amt">'+fmt(c.amount)+'</td><td>'+blk+'</td>'+
       '<td>'+(c.ts||'').slice(0,16).replace('T',' ')+'</td>'+
-      '<td>'+(c.paid ? '<span class="stat-paid">paid</span>' : '<span class="stat-pend">pending</span>')+'</td></tr>';
+      '<td>'+pay+'</td></tr>';
   }).join('');
 }
 function load(){

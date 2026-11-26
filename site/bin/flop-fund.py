@@ -85,7 +85,8 @@ def main():
                         and v.get("event_id") == "Transfer"):
                     a = v.get("attributes") or {}
                     if a.get("to") == MINER and n not in seen:
-                        rec = {"block": n, "from": a.get("from"),
+                        rec = {"block": n, "bhash": h,
+                               "from": a.get("from"),
                                "amount": a.get("amount", 0) / 1e18,
                                "ts": time.strftime("%Y-%m-%dT%H:%M:%SZ",
                                                    time.gmtime()),
@@ -98,6 +99,16 @@ def main():
         tot = sum(c["amount"] for c in new)
         tg(e, "[fund] +%.1f FLOP from %d transfer(s) — balance %.1f/%d"
               % (tot, len(new), bal, GOAL))
+    # merge payout records: {"<block>": "0xusdc_tx_hash"} — written when we
+    # settle a contribution; marks the row paid + gives it an arbiscan link
+    try:
+        payouts = json.load(open("/var/lib/flop-ops/fund-payouts.json"))
+    except Exception:
+        payouts = {}
+    for c in st["contributions"]:
+        tx = payouts.get(str(c["block"]))
+        if tx:
+            c["paid"], c["usdc_tx"] = True, tx
     st["last_block"] = head
     json.dump(st, open(STATE, "w"), indent=1)
     out = {"address": MINER, "goal_flop": GOAL, "balance_flop": round(bal, 2),
