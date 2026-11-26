@@ -53,12 +53,20 @@ def main():
     try:
         st = json.load(open(STATE))
     except Exception:
-        # no history scan needed: balance was 0 and we never spent,
-        # so inbound transfers provably cannot predate this run
+        # no history scan needed: we've never spent, so inbound transfers
+        # provably cannot predate this run — but a pre-existing balance
+        # (e.g. a faucet drip) is recorded as a labelled seed entry
         st = {"last_block": head, "contributions": []}
-    seen = {c["block"] for c in st["contributions"]}
+    seen = {c["block"] for c in st["contributions"] if c["block"] is not None}
     acct = si.query("System", "Account", [MINER]).value or {}
     bal = (acct.get("data", {}) or {}).get("free", 0) / 1e18
+    if not st["contributions"] and bal > 0:
+        st["contributions"].append({
+            "block": None, "from": "pre-existing balance",
+            "amount": bal,
+            "ts": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+            "paid": False,
+            "note": "balance present at fund launch (faucet grant)"})
 
     e = env()
     last = st["last_block"]
