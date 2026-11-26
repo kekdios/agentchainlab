@@ -38,7 +38,7 @@ body {
 }
 .topHeader {
   display: flex; align-items: center;
-  padding: 14px 22px;
+  padding: 14px max(20px, calc((100vw - 860px)/2 + 20px));
   border-bottom: 1px solid var(--border-subtle);
   background: var(--bg-card);
 }
