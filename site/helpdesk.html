@@ -69,6 +69,22 @@ textarea:focus { outline: none; border-color: var(--accent-secondary); }
 .chips button:hover { color: var(--text-primary); border-color: var(--accent-secondary); }
 .note { color: var(--text-muted); font-size: 12.5px; line-height: 1.6; }
 a { color: var(--accent-secondary); }
+.qa { border-bottom: 1px solid var(--border-subtle); padding: 14px 2px; }
+.qa:last-child { border-bottom: none; }
+.qa .qaQ { font-weight: 600; font-size: 13.5px; color: var(--text-primary);
+  cursor: pointer; list-style: none; }
+.qa .qaQ::before { content: "Q  "; color: var(--accent-secondary); font-weight: 700; }
+.qa .qaQ::-webkit-details-marker { display: none; }
+.qa .qaA { font-size: 13.5px; line-height: 1.6; color: var(--text-secondary);
+  margin: 8px 0 0 26px; white-space: pre-wrap; }
+.qa .qaA::before { content: "A  "; color: var(--text-muted); font-weight: 700;
+  position: relative; left: -26px; margin-right: -20px; }
+.qa .qaT { color: var(--text-muted); font-size: 11px; margin-top: 6px; margin-left: 26px; }
+.moreBtn { display: block; margin: 14px auto 0; background: var(--bg-card-elevated);
+  border: 1px solid var(--border-strong); color: var(--text-secondary);
+  border-radius: 999px; padding: 7px 20px; font-size: 12.5px; cursor: pointer; }
+.moreBtn:hover { color: var(--text-primary); border-color: var(--accent-secondary); }
+.qaEmpty { color: var(--text-muted); font-size: 13px; }
 </style>
 </head>
 <body>
@@ -112,6 +128,14 @@ a { color: var(--accent-secondary); }
   </section>
 
   <section>
+    <h2>Recently answered</h2>
+    <div class="card">
+      <div id="qaList"><div class="qaEmpty">loading…</div></div>
+      <button class="moreBtn" id="qaMore" style="display:none" onclick="loadMore()">load more</button>
+    </div>
+  </section>
+
+  <section>
     <h2>What this is</h2>
     <div class="card">
       <p class="note" style="margin:0">
@@ -126,6 +150,40 @@ a { color: var(--accent-secondary); }
 </main>
 <script>
 function chip(b){ document.getElementById('q').value = b.textContent; }
+var qaOff = 0, qaTotal = 0;
+function ago(ts){
+  var s = (Date.now()/1000) - ts;
+  if(s < 3600) return Math.max(1, Math.floor(s/60)) + 'm ago';
+  if(s < 86400) return Math.floor(s/3600) + 'h ago';
+  return Math.floor(s/86400) + 'd ago';
+}
+async function loadQA(){
+  try {
+    var r = await fetch('/helpdesk-api?limit=20&offset=' + qaOff);
+    var d = await r.json();
+    var list = document.getElementById('qaList');
+    if(qaOff === 0) list.innerHTML = '';
+    (d.items || []).forEach(function(it){
+      var el = document.createElement('details'); el.className = 'qa';
+      var sm = document.createElement('summary'); sm.className = 'qaQ';
+      sm.textContent = it.q;
+      var an = document.createElement('div'); an.className = 'qaA';
+      an.textContent = it.a;
+      var tm = document.createElement('div'); tm.className = 'qaT';
+      tm.textContent = ago(it.ts);
+      el.appendChild(sm); el.appendChild(an); el.appendChild(tm);
+      list.appendChild(el);
+    });
+    qaOff += (d.items || []).length; qaTotal = d.total || 0;
+    document.getElementById('qaMore').style.display = qaOff < qaTotal ? 'block' : 'none';
+    if(qaOff === 0) list.innerHTML = '<div class="qaEmpty">nothing answered yet — be the first.</div>';
+  } catch(e){
+    if(qaOff === 0) document.getElementById('qaList').innerHTML =
+      '<div class="qaEmpty">archive unavailable right now.</div>';
+  }
+}
+function loadMore(){ loadQA(); }
+loadQA();
 async function ask(){
   var q = document.getElementById('q').value.trim();
   if(!q) return;
@@ -141,7 +199,7 @@ async function ask(){
     var d = await r.json();
     th.style.display = 'none';
     box.className = 'answer show';
-    if(d.a){ body.textContent = d.a; note.textContent = 'answered by the helpdesk seat — verified ops context'; }
+    if(d.a){ body.textContent = d.a; note.textContent = 'answered by the helpdesk seat — verified ops context'; qaOff = 0; loadQA(); }
     else if(d.closed){ body.textContent = d.msg || 'the desk is closed — funding for today ran out. Back tomorrow.'; note.textContent = 'the desk runs on a fixed daily budget'; }
     else if(d.refused){ body.textContent = 'That one\'s outside the desk — FLOP questions only. Try a miner/testnet question.'; note.textContent=''; }
     else { body.textContent = d.error || 'desk hiccuped — try again'; note.textContent=''; }
