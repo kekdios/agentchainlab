@@ -166,7 +166,7 @@ h2 {
   <a class="fundbanner" href="/fund.html">
     <div>
       <div class="fb-title">Testnet self-sponsorship fund</div>
-      <div class="fb-sub">We're buying testnet FLOP to self-register our miner — every transfer on-chain</div>
+      <div class="fb-sub">Donations of testnet FLOP help us self-register our miner — every transfer on-chain</div>
     </div>
     <div class="fb-mid">
       <div class="fb-bar"><div class="fb-fill" id="fb-fill"></div></div>
