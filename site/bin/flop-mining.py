@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Collect FLOP devnet mining status → /var/www/agentchainlab/mining.json
+"""Collect FLOP testnet mining status → /var/www/agentchainlab/mining.json
 
 Pulls session/info (auth'd), worker log events, sponsor log, container +
 GPU state from the gpu.ai miner box, parses it into the JSON that
@@ -274,7 +274,7 @@ def main():
     if info.get("minerAddress"):
         try:
             chain = json.loads(urllib.request.urlopen(urllib.request.Request(
-                "https://explorer.devnet.flop.network/api/miners/"
+                "https://testnet.flopscan.io/api/miners/"
                 + info["minerAddress"],
                 headers={"User-Agent": "flop-ops/1.0"}), timeout=10).read())
         except Exception:
@@ -282,7 +282,7 @@ def main():
     net = {}
     try:
         net = json.loads(urllib.request.urlopen(urllib.request.Request(
-            "https://explorer.devnet.flop.network/api/stats",
+            "https://testnet.flopscan.io/api/stats",
             headers={"User-Agent": "flop-ops/1.0"}), timeout=10).read())
     except Exception:
         pass
@@ -322,7 +322,7 @@ def main():
         "updated": time.strftime("%Y-%m-%d %H:%M UTC", time.gmtime()),
         "identity": {
             "miner": info.get("minerAddress", "?"),
-            "worker": env_kv.get("WORKER_NAME", "devnet-ts-miner-01"),
+            "worker": env_kv.get("WORKER_NAME", "testnet-miner-01"),
             "model": info.get("model", env_kv.get("MODEL_NAME", "?")),
             "model_hash": (info.get("modelIdentity") or {}).get(
                 "modelHash", info.get("modelHash", "?")),

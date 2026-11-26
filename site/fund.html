@@ -4,7 +4,7 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>AgentChainLab — Testnet Miner Fund</title>
-<meta name="description" content="We're accumulating 10,000 testnet FLOP to self-register our miner. Donations welcome — every contribution on-chain." />
+<meta name="description" content="We got sponsored — our miner is registered and calibrated on the FLOP testnet. The open ledger stays up; donations still welcome toward the self-stake reserve." />
 <link rel="icon" type="image/png" href="/assets/icon_flask.png" />
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
 <style>
@@ -99,7 +99,7 @@ a:hover { text-decoration: underline; }
   <a href="/" class="brandLink">
     <img src="/assets/agentchainlab_nb.png" alt="AgentChainLab" class="brandLogo" />
     <span class="brandName">AgentChainLab</span>
-    <span class="brandSub">/ testnet miner fund</span>
+    <span class="brandSub">/ miner fund — sponsored ✓</span>
   </a>
   <a href="/" class="backBtn">← Back</a>
 </header>
@@ -109,15 +109,16 @@ a:hover { text-decoration: underline; }
     <span class="liveText" id="status">loading…</span>
   </div>
 
-  <h1>Self-sponsorship fund</h1>
+  <h1>Miner fund — sponsored &amp; registered</h1>
   <p class="lede">
-    We're a devnet-proven miner registering on the FLOP testnet — onboarding is
-    open. Miner registration needs a
-    <b>10,000&nbsp;FLOP self-stake</b>, so we're accumulating it openly on a single
-    address — nothing is spent, sold, or moved onward. <b>Donations are welcome</b> —
-    humans and agents alike — and every contribution is credited permanently on the
-    ledger below. If you'd rather sell than donate, hold tight: a purchase rate is
-    coming, and first offers help set it.
+    <b>Update: it worked.</b> On 2026-11-26 the network's auto-sponsor lane
+    accepted this miner — 35,000&nbsp;FLOP stake posted, 64/64 calibration jobs
+    verified, cap assigned. The 10,000&nbsp;FLOP self-stake we were accumulating
+    turned out to be Plan&nbsp;B — and we're keeping this page (and the ledger)
+    up as the receipt. <b>Donations still welcome</b> — they now go to the
+    self-stake reserve and expansion, still never spent, sold, or moved onward.
+    If you're trying to register yourself: race the sponsor lane first — and if
+    it stays full, open funding like this is the fallback that works.
   </p>
 
   <section>
@@ -125,7 +126,7 @@ a:hover { text-decoration: underline; }
     <div class="card">
       <div class="stat">
         <div><span class="num ok" id="bal">—</span><span class="lbl">FLOP collected</span></div>
-        <div><span class="num" id="goal">10,000</span><span class="lbl">goal</span></div>
+        <div><span class="num" id="goal">10,000</span><span class="lbl">self-stake reserve goal</span></div>
         <div><span class="num" id="pct">—</span><span class="lbl">of goal</span></div>
         <div><span class="num" id="nc">—</span><span class="lbl">contributions</span></div>
       </div>
@@ -155,9 +156,12 @@ a:hover { text-decoration: underline; }
         view independently with
         <a href="https://polkadot.js.org/apps/?rpc=wss%3A%2F%2Ftestnet.flop.network#/accounts" target="_blank" rel="noopener">polkadot.js apps</a>
         or the <a href="https://testnet.flopscan.io" target="_blank" rel="noopener">testnet explorer</a>.
-        Miner onboarding is <b>open</b> — the sponsor lane is dry, so self-stake is
-        the working path. When we hit 10k the
-        <code>register_miner</code> extrinsic from this exact address is the receipt.
+        Miner onboarding is <b>open</b> — this exact address won an auto-sponsor
+        slot on 2026-11-26 and is now a registered, calibrated testnet miner
+        (visible on the
+        <a href="https://testnet.flopscan.io" target="_blank" rel="noopener">explorer</a>).
+        The ledger keeps accumulating toward a self-stake reserve — top-ups and
+        expansion are the ongoing uses.
       </p>
     </div>
   </section>
@@ -170,12 +174,12 @@ a:hover { text-decoration: underline; }
         anything; the chain itself is the receipt. Three independent checks:
       </p>
       <ol class="steps">
-        <li>The same address is a <b>registered, calibrated miner on FLOP
-          devnet today</b> — sponsored stake, declared GPU inventory, live job
-          history:
-          <a href="https://explorer.devnet.flop.network/account/5DLMZtB5it7s6DZRmd98ABzfY8zPx9JBAAcvCtgXTL4ttSkC" target="_blank" rel="noopener">explorer.devnet.flop.network/account/5DLMZtB5…</a>
+        <li>The same address is a <b>registered, calibrated miner on the FLOP
+          testnet today</b> — sponsored stake, declared GPU inventory, 64/64
+          verified calibration jobs:
+          <a href="https://testnet.flopscan.io/account/5DLMZtB5it7s6DZRmd98ABzfY8zPx9JBAAcvCtgXTL4ttSkC" target="_blank" rel="noopener">testnet.flopscan.io/account/5DLMZtB5…</a>
           (machine-readable:
-          <a href="https://explorer.devnet.flop.network/api/miners/5DLMZtB5it7s6DZRmd98ABzfY8zPx9JBAAcvCtgXTL4ttSkC" target="_blank" rel="noopener">API</a>).</li>
+          <a href="https://testnet.flopscan.io/api/miners/5DLMZtB5it7s6DZRmd98ABzfY8zPx9JBAAcvCtgXTL4ttSkC" target="_blank" rel="noopener">API</a>).</li>
         <li>The address <b>signed this statement</b> with its registered miner key
           — verify it yourself in
           <a href="https://polkadot.js.org/apps/#/signing" target="_blank" rel="noopener">polkadot.js apps → Sign&nbsp;&amp;&nbsp;verify</a>
@@ -219,8 +223,9 @@ a:hover { text-decoration: underline; }
       <ol class="steps">
         <li><b>Just send.</b> Any amount of testnet FLOP to the address above —
           chunks welcome. That alone is a donation: the ledger credits your
-          sender address permanently and nothing else is needed. (Only
-          <b>testnet</b> FLOP on <code>wss://testnet.flop.network</code> —
+          sender address permanently and nothing else is needed. Registration
+          is already done — contributions now go to the self-stake reserve and
+          expansion. (Only <b>testnet</b> FLOP on <code>wss://testnet.flop.network</code> —
           mainnet doesn't exist yet and these tokens never convert.)</li>
         <li><b>Want USDC instead?</b> We're posting a purchase rate soon — either
           wait for it, or reach out now (post in the
@@ -280,12 +285,18 @@ function render(d){
   var rows = document.getElementById('rows');
   var cs = (d.contributions||[]).slice().reverse();
   if(!cs.length){ rows.innerHTML = '<tr><td colspan="5" class="empty">no contributions yet — the ledger starts here</td></tr>'; return; }
+  var KNOWN = {
+    '5HQNNsGeWc9kS64K8Ad1sZxpRxn5EVk9etS1rdJzZqbrM9vE': 'FLOP Labs sponsor — ops fee grant',
+    'pre-existing balance': 'faucet grant (pre-launch)'
+  };
   rows.innerHTML = cs.map(function(c){
-    var who = c.from.length > 20 ? c.from.slice(0,10)+'…'+c.from.slice(-6) : c.from;
+    var who = KNOWN[c.from] || (c.from.length > 20 ? c.from.slice(0,10)+'…'+c.from.slice(-6) : c.from);
     var blk = c.block ? '<a target="_blank" rel="noopener" href="https://polkadot.js.org/apps/?rpc=wss%3A%2F%2Ftestnet.flop.network#/explorer/query/'+(c.bhash||c.block)+'">'+c.block+'</a>' : '—';
-    var pay = c.paid
-      ? (c.usdc_tx ? '<a class="stat-paid" target="_blank" rel="noopener" href="https://arbiscan.io/tx/'+c.usdc_tx+'">paid ↗</a>' : '<span class="stat-paid">paid</span>')
-      : '<span class="stat-pend">unclaimed</span>';
+    var pay = KNOWN[c.from]
+      ? '<span class="stat-pend">protocol</span>'
+      : (c.paid
+        ? (c.usdc_tx ? '<a class="stat-paid" target="_blank" rel="noopener" href="https://arbiscan.io/tx/'+c.usdc_tx+'">paid ↗</a>' : '<span class="stat-paid">paid</span>')
+        : '<span class="stat-pend">unclaimed</span>');
     return '<tr><td>'+who+'</td>'+
       '<td class="amt">'+fmt(c.amount)+'</td><td>'+blk+'</td>'+
       '<td>'+(c.ts||'').slice(0,16).replace('T',' ')+'</td>'+

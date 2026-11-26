@@ -26,9 +26,9 @@ PYLIB = "/usr/local/lib/flop-ops/pylib"
 if PYLIB not in sys.path:
     sys.path.insert(0, PYLIB)
 
-# Endpoint: devnet default, override per-network (testnet at launch):
-#   FLOP_RPC_URL=wss://rpc.testnet.flop.network flop-chain.py pallets
-WS_RPC = os.environ.get("FLOP_RPC_URL", "wss://rpc.devnet.flop.network")
+# Endpoint: testnet default (post-migration 2026-11-26); override per-network:
+#   FLOP_RPC_URL=wss://rpc.devnet.flop.network flop-chain.py pallets
+WS_RPC = os.environ.get("FLOP_RPC_URL", "wss://testnet.flop.network")
 MINER_ADDR = "5DLMZtB5it7s6DZRmd98ABzfY8zPx9JBAAcvCtgXTL4ttSkC"
 OUR_CHANNEL = ("0x8e70fec05a140e4bd225a4b8c84cc8e33bdadc2a13038bc6242e"
                "8c77a5feabba")
@@ -155,7 +155,7 @@ def cmd_econ(si):
     """Token economics: supply, emission, reward pools, dilution, ours.
     All values raw (1e18 = 1 FLOP); callers convert for display."""
     miner = q(si, "MinerStaking", "Miners", [MINER_ADDR]) or {}
-    acct = q(si, "Balances", "Account", [MINER_ADDR]) or {}
+    acct = (q(si, "System", "Account", [MINER_ADDR]) or {}).get("data", {})
     return {
         "total_issuance": q(si, "Balances", "TotalIssuance"),
         "rewards": {
@@ -185,7 +185,8 @@ def cmd_econ(si):
         },
         "total_miners": q(si, "MinerStaking", "TotalMiners"),
         "total_stake": q(si, "MinerStaking", "TotalStake"),
-        "treasury_pot": q(si, "Balances", "Account", [TREASURY_POT]),
+        "treasury_pot": (q(si, "System", "Account", [TREASURY_POT]) or {})
+                        .get("data"),
         "our": {
             "rewards_earned": miner.get("total_rewards_earned"),
             "self_stake": miner.get("self_stake"),
