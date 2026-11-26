@@ -128,6 +128,24 @@ h2 {
 .announce .ann-linkwrap { color: var(--text-primary); text-decoration: none;
   display: flex; align-items: center; }
 .announce .ann-linkwrap:hover { text-decoration: underline; }
+.fundbanner { display: flex; flex-wrap: wrap; align-items: center; gap: 14px;
+  margin: 0 0 22px; padding: 14px 18px; text-decoration: none;
+  background: linear-gradient(135deg, rgba(34,139,34,0.22), rgba(46,157,46,0.10));
+  border: 1px solid rgba(46,157,46,0.55); border-radius: 12px; }
+.fundbanner:hover { border-color: var(--accent-secondary);
+  background: linear-gradient(135deg, rgba(34,139,34,0.30), rgba(46,157,46,0.15)); }
+.fundbanner .fb-title { color: var(--text-primary); font-size: 14px; font-weight: 700; }
+.fundbanner .fb-sub { color: var(--text-secondary); font-size: 12px; margin-top: 2px; }
+.fundbanner .fb-mid { flex: 1; min-width: 160px; }
+.fundbanner .fb-bar { height: 7px; border-radius: 4px; background: var(--bg-input);
+  border: 1px solid var(--border-strong); overflow: hidden; }
+.fundbanner .fb-fill { height: 100%; width: 0%; min-width: 2%;
+  background: linear-gradient(90deg, var(--accent-primary), var(--accent-secondary)); }
+.fundbanner .fb-num { font-family: var(--mono); font-size: 11.5px;
+  color: var(--text-secondary); margin-top: 4px; }
+.fundbanner .fb-cta { color: #0a1a29; background: var(--accent-secondary);
+  border-radius: 999px; padding: 8px 18px; font-size: 13px; font-weight: 700;
+  white-space: nowrap; }
 </style>
 </head>
 <body>
@@ -144,6 +162,18 @@ h2 {
     <a class="ann-arrow" id="ann-link" href="#">→</a>
     <span class="ann-dots" id="ann-dots"></span>
   </div>
+
+  <a class="fundbanner" href="/fund.html">
+    <div>
+      <div class="fb-title">Testnet self-sponsorship fund</div>
+      <div class="fb-sub">We're buying testnet FLOP to self-register our miner — every transfer on-chain</div>
+    </div>
+    <div class="fb-mid">
+      <div class="fb-bar"><div class="fb-fill" id="fb-fill"></div></div>
+      <div class="fb-num" id="fb-num">— / 10,000 FLOP</div>
+    </div>
+    <span class="fb-cta">Contribute →</span>
+  </a>
 
   <div class="liveRow">
     <span class="pulseDot" id="live-dot"></span>
@@ -214,6 +244,13 @@ async function tick() {
   }
 }
 tick(); setInterval(tick, 60000);
+fetch('/fund.json?_=' + Date.now()).then(function(r){return r.json();}).then(function(d){
+  var bal = d.balance_flop || 0, goal = d.goal_flop || 10000;
+  document.getElementById('fb-fill').style.width = Math.max(0.5, Math.min(100, 100*bal/goal)) + '%';
+  document.getElementById('fb-num').textContent =
+    bal.toLocaleString('en-US',{maximumFractionDigits:1}) + ' / ' +
+    goal.toLocaleString('en-US') + ' FLOP — ' + (100*bal/goal).toFixed(1) + '%';
+}).catch(function(){});
 </script>
 <script>
 (function(){
