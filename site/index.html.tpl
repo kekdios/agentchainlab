@@ -166,7 +166,6 @@ h2 {
     <div class="card"><div class="k">Spend so far</div><div class="v" id="s-spend">…</div></div>
     <div class="card"><div class="k">gpu.ai balance</div><div class="v" id="s-bal">…</div></div>
     <div class="card"><div class="k">Endpoint</div><div class="v" id="s-ep">…</div></div>
-    <div class="card"><div class="k">Kibble</div><div class="v" id="s-kib">…</div></div>
   </div>
 
   <h2>The short version</h2>
@@ -202,7 +201,6 @@ async function tick() {
     set('s-bal', s.gpuai_balance ? '$' + s.gpuai_balance : '—',
         s.gpuai_balance && Number(s.gpuai_balance) < 6.24 ? 'warn' : 'ok');
     set('s-ep', s.endpoint || '—', s.endpoint_state);
-    set('s-kib', s.kibble ? 'score ' + s.kibble : '—', s.kibble_state);
     document.getElementById('s-updated').textContent =
       'status updated ' + (s.updated || 'never') + ' · ' + (s.note || '');
     document.getElementById('live-dot').className =
