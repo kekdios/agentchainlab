@@ -1,0 +1,64 @@
+# flop-sim — the sandbox miner ("McDonald's University" trainee).
+# Two containers mirroring the real pair: backend = vLLM-shaped shim
+# backed by nano-gpt; worker = session/job surface with a readiness
+# toggle for failure injection. No GPU, no testnet, no secrets beyond
+# the shared ops env (NANOGPT_API_KEY already on the box).
+services:
+  backend:
+    image: python:3.13-slim
+    container_name: flop-sim-backend-1
+    command: python /sim/sim-backend.py
+    volumes:
+      - /usr/local/lib/flop-ops/sim:/sim:ro
+    env_file: /etc/flop-ops-sim.env
+    environment:
+      PORT: "8000"
+    ports:
+      - "127.0.0.1:8800:8000"
+    restart: unless-stopped
+  worker:
+    image: python:3.13-slim
+    container_name: flop-sim-worker-1
+    command: python /sim/sim-worker.py
+    volumes:
+      - /usr/local/lib/flop-ops/sim:/sim:ro
+      - sim-state:/state
+    env_file: /etc/flop-ops-sim.env
+    environment:
+      PORT: "8645"
+      SIM_BACKEND: "http://backend:8000"
+    ports:
+      - "127.0.0.1:8801:8645"
+    depends_on:
+      - backend
+    restart: unless-stopped
+  staff:
+    image: python:3.13-slim
+    container_name: flop-sim-staff-1
+    command: python /sim/sim-staff.py
+    volumes:
+      - /usr/local/lib/flop-ops/sim:/sim:ro
+      - /var/lib/flop-ops:/var/lib/flop-ops:ro
+      - /var/lib/exchange/treasury.json:/var/lib/exchange/treasury.json:ro
+    env_file: /etc/flop-ops-sim.env
+    environment:
+      PORT: "8802"
+    network_mode: host
+    restart: unless-stopped
+  devnet-val:
+    image: ghcr.io/flop-labs/flop-core/node-testnet:v0.1.486
+    container_name: flop-devnet-val
+    environment:
+      ZKV_CONF_CHAIN: dev
+    command:
+      - --dev
+      - --validator
+      - --rpc-port
+      - "9955"
+      - --unsafe-rpc-external
+      - --tmp
+    ports:
+      - "127.0.0.1:9955:9955"
+    restart: unless-stopped
+volumes:
+  sim-state:

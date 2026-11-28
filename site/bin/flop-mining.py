@@ -6,6 +6,7 @@ GPU state from the gpu.ai miner box, parses it into the JSON that
 /mining.html polls. Runs on cron (*/5). Never writes secrets to output.
 """
 import json
+import os
 import re
 import subprocess
 import sys
@@ -13,15 +14,17 @@ import time
 import urllib.request
 from pathlib import Path
 
-ENV_FILE = "/etc/flop-ops.env"
+ENV_FILE = os.environ.get("FLOP_OPS_ENV", "/etc/flop-ops.env")
 OUT = Path("/var/www/agentchainlab/mining.json")
-DRIFT_FILE = Path("/var/lib/flop-ops/last-drift")
-WORKSIG_FILE = Path("/var/lib/flop-ops/last-worksig")
+MINER_DIR = "/opt/flop-miner-testnet"
+WORKER_CONTAINER = "flop-miner-01-worker-1"
+DRIFT_FILE = Path(os.environ.get("DRIFT_FILE", "/var/lib/flop-ops/last-drift"))
+WORKSIG_FILE = Path(os.environ.get("WORKSIG_FILE", "/var/lib/flop-ops/last-worksig"))
 NOTIFY = "/usr/local/lib/flop-ops/notify.py"
 FLOP_CHAIN = "/usr/local/lib/flop-ops/flop-chain.py"
 
 REMOTE_CMD = r"""
-tok=$(grep -m1 '^SESSION_AUTH_TOKEN=' /opt/flop-miner/miner.env 2>/dev/null | cut -d= -f2)
+tok=$(grep -m1 '^SESSION_AUTH_TOKEN=' {MINER_DIR}/miner.env 2>/dev/null | cut -d= -f2)
 echo "==INFO=="
 info=""; for i in 1 2 3; do
   info=$(curl -sf --max-time 8 ${tok:+-H "Authorization: Bearer $tok"} http://127.0.0.1:8645/session/info 2>/dev/null) && break
@@ -34,7 +37,7 @@ fence=$(curl -sf --max-time 6 ${tok:+-H "Authorization: Bearer $tok"} http://127
 echo "$fence"
 echo
 echo "==LOG=="
-docker logs -t flop-miner-01-worker-1 --tail 400 2>&1 | tail -250
+docker logs -t {WORKER_CONTAINER} --tail 400 2>&1 | tail -250
 echo "==SPONSOR=="
 tail -40 /var/log/flop-sponsor.log 2>/dev/null
 echo "==DOCKER=="
@@ -42,7 +45,7 @@ docker ps --format '{{.Names}}|{{.Status}}'
 echo "==GPU=="
 nvidia-smi --query-gpu=name,utilization.gpu,memory.used,memory.total --format=csv,noheader 2>/dev/null
 echo "==ENV=="
-grep -E '^(WORKER_NAME|MODEL_NAME|FLOP_WORKER_IMAGE)=' /opt/flop-miner/miner.env
+grep -E '^(WORKER_NAME|MODEL_NAME|FLOP_WORKER_IMAGE)=' {MINER_DIR}/miner.env
 """
 
 # Log lines worth surfacing in the activity feed.
@@ -90,7 +93,9 @@ def fetch(env):
         "-o", "StrictHostKeyChecking=accept-new", "-p", port,
         f"root@{host}", "bash", "-s",
     ]
-    p = subprocess.run(cmd, input=REMOTE_CMD, capture_output=True,
+    remote = REMOTE_CMD.replace("{MINER_DIR}", MINER_DIR).replace(
+        "{WORKER_CONTAINER}", WORKER_CONTAINER)
+    p = subprocess.run(cmd, input=remote, capture_output=True,
                        text=True, timeout=90)
     if p.returncode != 0:
         raise RuntimeError(f"ssh rc={p.returncode}: {p.stderr[:200]}")
@@ -125,13 +130,16 @@ def f18(x):
         return None
 
 
-def fetch_econ():
+def fetch_econ(env=None):
     """On-chain token economics via flop-chain.py (one WS connect).
     FLOP-unit floats for balances, raw ints for counters/blocks."""
+    env_ = dict(os.environ)
+    if env and env.get("MINER_ADDR"):
+        env_["MINER_ADDR"] = env["MINER_ADDR"]
     for _ in range(2):
         try:
             p = subprocess.run([FLOP_CHAIN, "econ"], capture_output=True,
-                               text=True, timeout=120)
+                               text=True, timeout=120, env=env_)
             r = json.loads(p.stdout)
             if isinstance(r, dict) and "total_issuance" in r:
                 break
@@ -230,7 +238,22 @@ def parse_events(log):
 
 
 def main():
+    global OUT, MINER_DIR, WORKER_CONTAINER
     env = load_env()
+    # Per-miner overrides may come from either the process env or the env
+    # file (FLOP_OPS_ENV selects the file on multi-miner crons).
+    for k in ("MINING_OUT", "MINER_DIR", "WORKER_CONTAINER", "DRIFT_FILE",
+              "WORKSIG_FILE"):
+        v = os.environ.get(k) or env.get(k)
+        if v:
+            if k == "MINING_OUT":
+                OUT = Path(v)
+            elif k == "DRIFT_FILE":
+                globals()["DRIFT_FILE"] = Path(v)
+            elif k == "WORKSIG_FILE":
+                globals()["WORKSIG_FILE"] = Path(v)
+            else:
+                globals()[k] = v
     try:
         s = fetch(env)
     except Exception as e:
@@ -287,7 +310,7 @@ def main():
     except Exception:
         pass
 
-    econ = fetch_econ() or prev.get("econ") or {}
+    econ = fetch_econ(env) or prev.get("econ") or {}
 
     try:
         fence = json.loads(s.get("FENCE", ""))
@@ -311,12 +334,40 @@ def main():
     cal = info.get("calibration") or {}
     img = env_kv.get("FLOP_WORKER_IMAGE", "")
     drift = DRIFT_FILE.read_text().strip() if DRIFT_FILE.exists() else "?"
+    try:
+        # Prefer a live check: running build vs releases.json latest. The
+        # env's :stable tag can't string-match the digest-pinned release
+        # (that produced a permanent false STALE on miner-01, 2026-11-27).
+        relv = json.loads(urllib.request.urlopen(urllib.request.Request(
+            "https://flop.network/releases.json",
+            headers={"User-Agent": "flop-ops/1.0"}), timeout=10).read())
+        latest = (relv.get("miner-worker") or {}).get("latest")
+        wver = (info.get("image") or {}).get("version")
+        if latest and wver:
+            drift = "current" if wver == latest else "STALE"
+    except Exception:
+        pass
     docker = {}
     for line in s.get("DOCKER", "").splitlines():
         if "|" in line:
             n, st = line.split("|", 1)
             docker[n.strip()] = st.strip()
     sponsor = parse_sponsor(s.get("SPONSOR", ""))
+    if not sponsor["legs"]:
+        # Faucet-lane sponsorship leaves no local legs — read the on-chain
+        # position so the tile shows the real posted bond.
+        reg_tx = next((a.get("transactionHash")
+                       for a in chain.get("stakingActivity") or []
+                       if a.get("call") == "sponsorRegisterMiner"), None)
+        for pos in chain.get("sponsorPositions") or []:
+            st = pos.get("status") or "active"
+            sponsor["legs"].append({
+                "kind": "auto-" + (pos.get("role") or "sponsor"),
+                "flop": round(int(pos.get("amount", "0") or 0) / 1e18, 4),
+                "tx": reg_tx, "state": st,
+            })
+            if st == "active":
+                sponsor["settled"] = True
 
     data = {
         "updated": time.strftime("%Y-%m-%d %H:%M UTC", time.gmtime()),

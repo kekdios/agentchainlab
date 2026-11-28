@@ -22,7 +22,8 @@ note=""
 if REMOTE=$($SSH 'bash -s' <<'EOS' 2>/dev/null
 gpu=$(nvidia-smi --query-gpu=name,utilization.gpu,memory.used,memory.total --format=csv,noheader 2>/dev/null | head -1)
 dock=$(docker ps --format '{{.Names}}:{{.Status}}' 2>/dev/null | tr '\n' ';')
-tok=$(grep -m1 '^SESSION_AUTH_TOKEN=' /opt/flop-miner/miner.env 2>/dev/null | cut -d= -f2)
+if [ -d /opt/flop-miner-testnet ]; then mdir=/opt/flop-miner-testnet; else mdir=/opt/flop-miner; fi
+tok=$(grep -m1 '^SESSION_AUTH_TOKEN=' "$mdir/miner.env" 2>/dev/null | cut -d= -f2)
 info=""; for i in 1 2 3; do
   info=$(curl -sf --max-time 8 ${tok:+-H "Authorization: Bearer $tok"} http://127.0.0.1:8645/session/info 2>/dev/null) && break
   info=""; sleep 2
@@ -41,8 +42,8 @@ if echo "$fence" | grep -q '"fenced"[ :]*true' && [ -n "$fsha" ] && [ ! -f "/roo
   fence=$(curl -sf --max-time 6 ${tok:+-H "Authorization: Bearer $tok"} http://127.0.0.1:8645/internal/signer-fence 2>/dev/null)
 fi
 disk=$(df -h / | awk 'NR==2{print $4" free"}')
-model=$(basename "$(grep -m1 '^MODEL_NAME=' /opt/flop-miner/miner.env 2>/dev/null | cut -d= -f2-)" 2>/dev/null)
-wimg=$(grep -m1 '^FLOP_WORKER_IMAGE=' /opt/flop-miner/miner.env 2>/dev/null | cut -d= -f2-)
+model=$(basename "$(grep -m1 '^MODEL_NAME=' "$mdir/miner.env" 2>/dev/null | cut -d= -f2-)" 2>/dev/null)
+wimg=$(grep -m1 '^FLOP_WORKER_IMAGE=' "$mdir/miner.env" 2>/dev/null | cut -d= -f2-)
 echo "GPU=$gpu"
 echo "DOCKER=$dock"
 echo "DISK=$disk"
@@ -135,7 +136,8 @@ fi
 # (unblocks self-custodial spend + declare-gpu) — sig change emails on bump.
 drift=$(cat /var/lib/flop-ops/last-drift 2>/dev/null || echo "?")
 cliver=$(cat /var/lib/flop-ops/last-cliver 2>/dev/null || echo "?")
-wimg=$(echo "${REMOTE:-}" | sed -n 's/^WORKER_IMG=//p')
+wver=$(echo "${info:-}" | grep -oE '"version"[ :]*"[0-9]+\.[0-9]+\.[0-9]+"' \
+  | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | head -1)
 rel_json=$(curl -fsm10 https://flop.network/releases.json 2>/dev/null || true)
 rel=$(echo "$rel_json" | python3 -c 'import json,sys;d=json.load(sys.stdin);print(d.get("miner-worker",{}).get("image","")+"\t"+d.get("cli",{}).get("latest",""))' 2>/dev/null || true)
 # Testnet tripwire: releases.json is where pack/image/node artifacts will
@@ -150,8 +152,12 @@ else
 fi
 case "$rel_json" in *[Tt]estnet*) note="TESTNET DETECTED in releases.json; $note";; esac
 rel_img=$(echo "$rel" | cut -f1); cli_new=$(echo "$rel" | cut -f2)
-if [ -n "$rel_img" ] && [ -n "$wimg" ]; then
-  if [ "$wimg" = "$rel_img" ]; then drift="current"; else drift="STALE"; fi
+# Compare the RUNNING build (session/info image.version) against releases.json
+# latest — miner.env pins the :stable tag, which can never string-match the
+# digest-pinned release and produced permanent false STALE (2026-11-27).
+rel_latest=$(echo "$rel_json" | python3 -c 'import json,sys;print(json.load(sys.stdin).get("miner-worker",{}).get("latest",""))' 2>/dev/null || true)
+if [ -n "$rel_latest" ] && [ -n "$wver" ]; then
+  if [ "$wver" = "$rel_latest" ]; then drift="current"; else drift="STALE"; fi
   mkdir -p /var/lib/flop-ops; echo "$drift" > /var/lib/flop-ops/last-drift
 fi
 if [ -n "$cli_new" ] && [ "$cli_new" != "$cliver" ]; then

@@ -29,9 +29,11 @@ if PYLIB not in sys.path:
 # Endpoint: testnet default (post-migration 2026-11-26); override per-network:
 #   FLOP_RPC_URL=wss://rpc.devnet.flop.network flop-chain.py pallets
 WS_RPC = os.environ.get("FLOP_RPC_URL", "wss://testnet.flop.network")
-MINER_ADDR = "5DLMZtB5it7s6DZRmd98ABzfY8zPx9JBAAcvCtgXTL4ttSkC"
-OUR_CHANNEL = ("0x8e70fec05a140e4bd225a4b8c84cc8e33bdadc2a13038bc6242e"
-               "8c77a5feabba")
+MINER_ADDR = os.environ.get(
+    "MINER_ADDR", "5DLMZtB5it7s6DZRmd98ABzfY8zPx9JBAAcvCtgXTL4ttSkC")
+OUR_CHANNEL = os.environ.get(
+    "OUR_CHANNEL",
+    "0x8e70fec05a140e4bd225a4b8c84cc8e33bdadc2a13038bc6242e8c77a5feabba")
 INTERESTING = {"ComputeChannel", "HwCalibration", "MinerStaking",
                "SyntheticTasks", "HasStation", "MinerSlashing",
                "AirdropVesting", "TokenClaim", "FlopPoui",
